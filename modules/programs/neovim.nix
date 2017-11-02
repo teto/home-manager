@@ -179,6 +179,22 @@ in
       home.packages = [ pkgs.neovim ];
 
 
+      # pluginPython3Packages = if configure == null then [] else builtins.concatLists
+      # (map ({ python3Dependencies ? [], ...}: python3Dependencies)
+      # (vimUtils.requiredPlugins configure));
+      python3Env = python3Packages.python.buildEnv.override {
+        extraLibs = [ python3Packages.neovim ] ++ cfg.extraPython3Packages;
+        ignoreCollisions = true;
+      };
+      python3Wrapper = ''--cmd \"let g:python3_host_prog='$out/bin/nvim-python3'\" '';
+      pythonFlags = optionalString (cfg.withPython || cfg.withPython3) ''--add-flags "${
+        (optionalString withPython pythonWrapper) +
+        (optionalString withPython3 python3Wrapper)
+      }"'';
+
+      # ln -s ${python3Env}/bin/python3 $out/bin/nvim-python3
+
+      # todo register python-language-server binary into path
       # ${cfg.configPath}
       xdg.configFile."nvim/hm.vim".text = ''
         " VIM COMMENT
