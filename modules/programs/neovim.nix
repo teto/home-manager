@@ -5,7 +5,7 @@ with lib;
 # la config de vim est dans /etc/vim
 let
 
-  cfg = config.programs.vim;
+  cfg = config.programs.neovim;
   defaultPlugins = [ "sensible" ];
 
   knownSettings = {
@@ -172,32 +172,36 @@ in
       #     { names = defaultPlugins ++ cfg.plugins; }
       #   ];
       # };
-
-    in mkIf cfg.enable {
-
-      # TODO allow to customize
-      home.packages = [ pkgs.neovim ];
-
-
       # pluginPython3Packages = if configure == null then [] else builtins.concatLists
       # (map ({ python3Dependencies ? [], ...}: python3Dependencies)
       # (vimUtils.requiredPlugins configure));
-      python3Env = python3Packages.python.buildEnv.override {
-        extraLibs = [ python3Packages.neovim ] ++ cfg.extraPython3Packages;
+      python3Env = pkgs.python3Packages.python.buildEnv.override {
+        extraLibs = [ pkgs.python3Packages.neovim ] ++ cfg.extraPython3Packages;
         ignoreCollisions = true;
       };
-      python3Wrapper = ''--cmd \"let g:python3_host_prog='$out/bin/nvim-python3'\" '';
+
+      # python3Wrapper = ''--cmd \"let g:python3_host_prog='${python3Env}/bin/nvim-python3'\" '';
       pythonFlags = optionalString (cfg.withPython || cfg.withPython3) ''--add-flags "${
         (optionalString withPython pythonWrapper) +
         (optionalString withPython3 python3Wrapper)
       }"'';
 
+
+    in mkIf cfg.enable rec {
+
+      # TODO allow to customize
+      home.packages = [ pkgs.neovim ];
+
       # ln -s ${python3Env}/bin/python3 $out/bin/nvim-python3
+      # home.activation.checkI3 = dagEntryBefore [ "linkGeneration" ] ''
 
       # todo register python-language-server binary into path
       # ${cfg.configPath}
       xdg.configFile."nvim/hm.vim".text = ''
         " VIM COMMENT
+        let g:python3_host_prog='${python3Env}/bin/python3'
+        " todo save path to python-language-server
+        let g:python_language_server='${python3Env}/bin/python3'
         '';
     };
   # # '' + optionalString (configure != null) ''
