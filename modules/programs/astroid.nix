@@ -14,28 +14,33 @@ let
 
   boolOpt = b: if b then "true" else "false";
 
-  accountAttr = account:
-    with account;
-    {
-      email = address;
-      name = realName;
-      sendmail = astroid.sendMailCommand;
-      additional_sent_tags = "";
-      default = boolOpt primary;
-      save_drafts_to = "${maildir.absPath}/${folders.drafts}";
-      save_sent = "true";
-      save_sent_to = "${maildir.absPath}/${folders.sent}";
-      select_query = "";
-    } // optionalAttrs (signature.showSignature != "none") {
-      signature_attach = boolOpt (signature.showSignature == "attach");
-      signature_default_on = boolOpt (signature.showSignature != "none");
-      signature_file = pkgs.writeText "signature.txt" signature.text;
-      signature_file_markdown = "false";
-      signature_separate = "true"; # prepends '--\n' to the signature
-    } // optionalAttrs (gpg != null) {
-      always_gpg_sign = boolOpt gpg.signByDefault;
-      gpgkey = gpg.key;
-    } // astroid.extraConfig;
+
+  accountAttr = account: with account;
+    let 
+      absPath = relPath: config.accounts.email.maildirBasePath + "/" + name + "/" + relPath;
+    in {
+    email = address;
+    name = realName;
+    sendmail = astroid.sendMailCommand;
+    additional_sent_tags = "";
+    default = boolOpt primary;
+    save_drafts_to = "${maildir.absPath}/${folders.drafts}";
+    save_sent = "true";
+    save_sent_to = "${maildir.absPath}/${folders.sent}";
+    select_query = "";
+  }
+  // optionalAttrs (signature.showSignature != "none") {
+    signature_attach = boolOpt (signature.showSignature == "attach");
+    signature_default_on = boolOpt (signature.showSignature != "none");
+    signature_file = pkgs.writeText "signature.txt" signature.text;
+    signature_file_markdown = "false";
+    signature_separate = "true";  # prepends '--\n' to the signature
+  }
+  // optionalAttrs (gpg != null) {
+    always_gpg_sign = boolOpt gpg.signByDefault;
+    gpgkey = gpg.key;
+  }
+  // astroid.extraConfig;
 
   # See https://github.com/astroidmail/astroid/wiki/Configuration-Reference
   finalConfig = let
