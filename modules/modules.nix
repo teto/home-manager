@@ -251,6 +251,7 @@ let
       ./programs/pylint.nix
       ./programs/pywal.nix
       ./programs/qcal.nix
+      ./programs/pywal.nix
       ./programs/qutebrowser.nix
       ./programs/ranger.nix
       ./programs/rbenv.nix

@@ -230,6 +230,15 @@ in
         Configuration options to add to the various sections in the configuration file.
       '';
     };
+    extraConfig = mkOption {
+      type = lib.types.lines;
+      default = "";
+      description = ''
+        Extra configuration lines to append to the khal
+        configuration file.
+      '';
+    };
+
   };
 
   config = lib.mkIf cfg.enable {
@@ -253,6 +262,8 @@ in
             };
           }
         ))
+        cfg.extraConfig
+
       ]
     );
   };

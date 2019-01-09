@@ -50,6 +50,7 @@ in
         set_from_resource $hl           i3wm.color13 #ff0000
       '';
 
+      # we should use an include like for sway ?
       config.colors = {
         focused = {
           border = "$fg-alt";
