@@ -6,9 +6,12 @@ let
 
   cfg = config.services.mbsync;
 
-  mbsyncOptions = [ "--all" ] ++ optional (cfg.verbose) "--verbose"
-    ++ optional (cfg.configFile != null) "--config ${cfg.configFile}";
+  mbsyncAccounts = filter (a: a.mbsync.enable && a.mbsync.sync)
+    (attrValues config.accounts.email.accounts);
 
+  mbsyncOptions = optional (cfg.verbose) "--verbose"
+    ++ optional (cfg.configFile != null) "--config ${cfg.configFile}"
+    ++ [ (concatMapStringsSep " -a" (a: a.name) mbsyncAccounts) ];
 in {
   meta.maintainers = [ maintainers.pjones ];
 
@@ -78,18 +81,43 @@ in {
         lib.platforms.linux)
     ];
 
-    systemd.user.services.mbsync = {
+    systemd.user.services.mbsync = let 
+      # temporary solution since it's not portable
+      getPassword = accountName:
+        let
+        # https://superuser.com/questions/624343/keep-gnupg-credentials-cached-for-entire-user-session
+        # 	  export PASSWORD_STORE_GPG_OPTS=" --default-cache-ttl 34560000"
+          script = pkgs.writeShellScriptBin "pass-show" ''
+          ${pkgs.pass}/bin/pass show "$@" | ${pkgs.coreutils}/bin/head -n 1
+        '';
+        in
+          "${script}/bin/pass-show ${accountName}";
+      execStartPreScript = pkgs.writeShellScript "mk_data_dir" ''
+        ${getPassword "perso/fastmail_mc"} > /tmp/fastmail_pwd;
+      '';
+    in
+
+      {
       Unit = { Description = "mbsync mailbox synchronization"; };
 
       Service = {
         Type = "oneshot";
-        ExecStart =
-          "${cfg.package}/bin/mbsync ${concatStringsSep " " mbsyncOptions}";
+        # should have one credential per account ?
+        LoadCredential = "mbsync:/tmp/fastmail_pwd";
+        # PrivateTmp = "yes";
+        ExecStartPre = builtins.toString execStartPreScript;
+        ExecStart = let
+          # mbsyncOptions
+          # mbsyncOptions = [ "--all" ] ++ optional (cfg.verbose) "--verbose"
+          # ++ optional (cfg.configFile != null) "--config ${cfg.configFile}";
+        in "${cfg.package}/bin/mbsync ${concatStringsSep " " mbsyncOptions}";
       } // (optionalAttrs (cfg.postExec != null) {
         ExecStartPost = cfg.postExec;
       }) // (optionalAttrs (cfg.preExec != null) {
         ExecStartPre = cfg.preExec;
       });
+
+      # PrivateTmp = true;
     };
 
     systemd.user.timers.mbsync = {

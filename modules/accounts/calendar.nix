@@ -41,6 +41,27 @@ let
 
   remoteModule = types.submodule {
     options = {
+      # TODO support flavor
+      # flavor = mkOption {
+      #   type = types.enum [
+      #     "plain"
+      #     "gmail.com"
+      #     "runbox.com"
+      #     "fastmail.com"
+      #     "yandex.com"
+      #     "outlook.office365.com"
+      #   ];
+      #   default = "plain";
+      #   description = ''
+      #     Some email providers have peculiar behavior that require
+      #     special treatment. This option is therefore intended to
+      #     indicate the nature of the provider.
+      #     </para><para>
+      #     When this indicates a specific provider then, for example,
+      #     the IMAP, SMTP, and JMAP server configuration may be set
+      #     automatically.
+      #   '';
+      # };
       type = mkOption {
         type = types.enum [ "caldav" "http" "google_calendar" ];
         description = "The type of the storage.";
@@ -57,6 +78,16 @@ let
         default = null;
         description = "User name for authentication.";
       };
+
+      # TODO
+      # userNameCommand = mkOption {
+      #   type = types.nullOr (types.listOf types.str);
+      #   default = null;
+      #   example = [ "~/get-username.sh" ];
+      #   description = ''
+      #     A command that prints the user name to standard output.
+      #   '';
+      # };
 
       passwordCommand = mkOption {
         type = types.nullOr (types.listOf types.str);

@@ -18,6 +18,8 @@ let
     ./accounts/calendar.nix
     ./accounts/contacts.nix
     ./config/home-cursor.nix
+    ./accounts/calendar.nix
+    ./accounts/contacts.nix
     ./config/i18n.nix
     ./files.nix
     ./home-environment.nix
@@ -198,6 +200,7 @@ let
     ./programs/pyenv.nix
     ./programs/pylint.nix
     ./programs/qcal.nix
+    ./programs/pywal.nix
     ./programs/qutebrowser.nix
     ./programs/ranger.nix
     ./programs/rbw.nix
@@ -249,6 +252,7 @@ let
     ./programs/rbenv.nix
     ./programs/watson.nix
     ./programs/waybar.nix
+    # ./programs/weechat.nix
     ./programs/wezterm.nix
     ./programs/wlogout.nix
     ./programs/wofi.nix

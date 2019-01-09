@@ -20,6 +20,8 @@ let
 
   filterNull = attrs: attrsets.filterAttrs (n: v: v != null) attrs;
 
+  # name = "${account.maildir.absPath}/mujmap.toml";
+  # value.source = settingsFormat.generate "mujmap-${lib.replaceStrings ["@"] ["-"] account.address}.toml" ({
   configFile = account:
     let
       settings'' = if (account.jmap == null) then

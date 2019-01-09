@@ -79,6 +79,34 @@ in {
   options.programs.kitty = {
     enable = mkEnableOption "Kitty terminal emulator";
 
+    # 
+    shellIntegration = mkOption {
+      type = types.nullOr (types.submodule {
+        options = {
+          # method = mkOption {
+          #   type = types.enum [ "factor" "pixel" ];
+          #   description = "Output scaling method.";
+          #   default = "factor";
+          #   example = "pixel";
+          # };
+
+          enable = mkEnableOption "shell integration";
+
+          # enable = mkOption {
+          #   type = types.either types.float types.ints.positive;
+          #   description = "Horizontal scaling factor/pixels.";
+          # };
+
+          # y = mkOption {
+          #   type = types.either types.float types.ints.positive;
+          #   description = "Vertical scaling factor/pixels.";
+          # };
+        };
+      });
+    };
+
+    # mkEnableOption "Kitty terminal emulator";
+
     package = mkOption {
       type = types.package;
       default = pkgs.kitty;

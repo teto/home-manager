@@ -2,10 +2,23 @@
 
 with lib;
 
-let cfg = config.programs.pywal;
+let
+  cfg = config.programs.pywal;
+  supportedProgram = types.enum [ "neovim" "kitty" "rofi" "i3" "sway" ];
 
 in {
-  options = { programs.pywal = { enable = mkEnableOption "pywal"; }; };
+  options = {
+    programs.pywal = { enable = mkEnableOption "pywal"; };
+
+    blocklist = mkOption {
+      type = types.listOf supportedProgram;
+      default = [ ];
+      example = literalExpression ''[ "kitty" , "neovim"]'';
+      description = ''
+        Prevents pywal from being executed for some programs.
+      '';
+    };
+  };
 
   config = mkIf cfg.enable {
 
@@ -18,6 +31,8 @@ in {
       (cat ${config.xdg.cacheHome}/wal/sequences &)
     '';
 
+    # TODO check if
+    # mkIf "kitty" cfg.blocklist
     programs.kitty.extraConfig = ''
       include ${config.xdg.cacheHome}/wal/colors-kitty.conf
     '';

@@ -453,9 +453,9 @@ in {
         set implicit_autoview = yes
         set crypt_use_gpgme = yes
 
-        alternative_order text/enriched text/plain text
+            alternative_order text/enriched text/plain text
 
-        set delete = yes
+            set delete = yes
 
         ${optionalString cfg.vimKeys
         "source ${pkgs.neomutt}/share/doc/neomutt/vim-keys/vim-keys.rc"}
