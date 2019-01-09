@@ -871,6 +871,12 @@ in
         '';
   };
 
+  pywalColors = mkOption {
+    type = types.bool;
+    default = false;
+    description = "Use pywal colors.";
+  };
+
   gaps = mkOption {
     type = types.nullOr (
       types.submodule {
