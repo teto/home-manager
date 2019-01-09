@@ -107,6 +107,15 @@ in {
         '';
       };
 
+      checkConfig = mkOption {
+        type = types.bool;
+        default = false;
+        description = ''
+          run some tests to check your config is valid.
+          Disable if you rely on an impure behavior.
+        '';
+      };
+
       vimAlias = mkOption {
         type = types.bool;
         default = false;
@@ -398,7 +407,21 @@ in {
       customRC = cfg.extraConfig;
     };
 
-  in mkIf cfg.enable {
+  in mkIf cfg.enable (
+    let
+
+      luaPlugins = filter (p: p.type == "lua") pluginsNormalized;
+      generatedConfigs.lua = generatedConfigLua;
+      generatedConfigLua = lib.concatMapStrings pluginConfigLua luaPlugins;
+    in
+    {
+    # warnings = optional (filter (p: isDerivation p) cfg.plugins != []) ''
+    #   All plugins should now be of type 'pluginWithConfigType' and not a package anymore, e.g.,
+    #     plugins = [ plenary-nvim ];
+    #   should now be:
+    #     plugins = [ { plugin = plenary-nvim; } ];
+    # ''
+    # ;
 
     programs.neovim.generatedConfigViml = neovimConfig.neovimRcContent;
 
@@ -445,5 +468,5 @@ in {
           + extraMakeWrapperLuaArgs;
         wrapRc = false;
       });
-  };
+  });
 }

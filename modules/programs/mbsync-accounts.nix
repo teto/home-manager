@@ -115,6 +115,8 @@ in {
   options.mbsync = {
     enable = mkEnableOption "synchronization using mbsync";
 
+    sync = mkEnableOption "Sync";
+
     flatten = mkOption {
       type = types.nullOr types.str;
       default = null;
