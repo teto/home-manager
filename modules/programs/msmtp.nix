@@ -31,7 +31,7 @@ let
         }
         // msmtp.extraConfig
       )
-      # ++ optional primary "\naccount default : ${name}"
+      ++ optional primary "\naccount default : ${name}"
     );
 
   configFile = mailAccounts: ''
