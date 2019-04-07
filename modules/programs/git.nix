@@ -6,6 +6,8 @@ let
 
   cfg = config.programs.git;
 
+  nixos = import <nixpkgs/nixos> {};
+
   # create [section "subsection"] keys from "section.subsection" attrset names
   mkSectionName = name:
     let

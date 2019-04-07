@@ -16,7 +16,7 @@ let
 
 
   accountAttr = account: with account;
-    let 
+    let
       absPath = relPath: config.accounts.email.maildirBasePath + "/" + name + "/" + relPath;
     in {
     email = address;
@@ -24,9 +24,9 @@ let
     sendmail = astroid.sendMailCommand;
     additional_sent_tags = "";
     default = boolOpt primary;
-    save_drafts_to = "${maildir.absPath}/${folders.drafts}";
+    save_drafts_to = "${maildir.absPath}/${folders.drafts}/new";
     save_sent = "true";
-    save_sent_to = "${maildir.absPath}/${folders.sent}";
+    save_sent_to = "${maildir.absPath}/${folders.sent}/new";
     select_query = "";
   }
   // optionalAttrs (signature.showSignature != "none") {
