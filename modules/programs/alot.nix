@@ -19,6 +19,7 @@ let
         else toString value;
     in
       "${key} = ${value'}";
+  mk2ndLevelSectionName = name:  "[" + name + "]";
 
   mkKeyValue = key: value:
     let value' = if isBool value then boolStr value else toString value;
@@ -62,7 +63,7 @@ let
         default = null;
         description = "How to display the tag when focused.";
       };
-    };
+  };
   };
 
   accountStr = account:

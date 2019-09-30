@@ -117,7 +117,7 @@ let
       in {
         smtp_url = "'${smtpBaseUrl}'";
         smtp_pass = "'`${passCmd}`'";
-    };
+      };
 
   genMaildirAccountConfig = account:
     with account;
