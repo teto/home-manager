@@ -251,6 +251,18 @@ in
         description = "Enable zsh autosuggestions";
       };
 
+      autosuggestion = {
+        enable = mkOption {
+          default = false;
+          description = "Enable zsh autosuggestions";
+        };
+        highlight = mkOption {
+          default = "cyan";
+          description = "Enable zsh autosuggestions";
+          # AUTOSUGGESTION_HIGHLIGHT_COLOR="fg=cyan"
+        };
+      };
+
       history = mkOption {
         type = historyModule;
         default = {};
@@ -430,11 +442,12 @@ in
         ${optionalString (cfg.enableCompletion && !cfg.oh-my-zsh.enable && !cfg.prezto.enable)
           "autoload -U compinit && compinit"
         }
+        '' + optionalString cfg.autosuggestion.enable ''
 
-        ${optionalString cfg.enableAutosuggestions
           "source ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
-        }
-
+          AUTOSUGGESTION_HIGHLIGHT_COLOR="fg=${cfg.autosuggestion.highlight}"
+        } ''
+        + ''
         # Environment variables
         . "${config.home.profileDirectory}/etc/profile.d/hm-session-vars.sh"
         ${envVarsStr}
