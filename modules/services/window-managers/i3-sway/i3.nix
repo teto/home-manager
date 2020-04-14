@@ -189,7 +189,7 @@ let
       ${concatStringsSep "\n" (map workspaceOutputStr workspaceOutputAssign)}
     ''
   else
-    "") + "\n" + cfg.extraConfig);
+    ""));
 
   # Validates the i3 configuration
   checkI3Config =

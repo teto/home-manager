@@ -33,7 +33,7 @@ let
           Defaults to UTF-8.
         '';
       };
-    };                  
+    };
   };
 
   remoteModule = types.submodule {
@@ -155,7 +155,10 @@ in
   options.accounts.calendar = {
     basePath = mkOption {
       type = types.str;
-      default = "${config.home.homeDirectory}/.calendars/";
+      default = "$HOME/.calendars";
+      # doesn't compile with flakes
+      # TODO defer it
+      # default = "${config.home.homeDirectory}/.calendars/";
       defaultText = "$HOME/.calendars";
       description = ''
         The base directory in which to save calendars.

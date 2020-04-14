@@ -135,7 +135,9 @@ in
   options.accounts.contact = {
     basePath = mkOption {
       type = types.str;
-      default = "${config.home.homeDirectory}/.contacts/";
+      default = "$HOME/.contacts";
+      # TODO defer initialization to compiule with flakes
+      # default = "${config.home.homeDirectory}/.contacts/";
       defaultText = "$HOME/.contacts";
       description = ''
         The base directory in which to save contacts.

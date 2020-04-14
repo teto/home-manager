@@ -22,12 +22,26 @@ let
         default = "";
       };
 
+      lua = mkOption {
+        type = types.lines;
+        description = "lua for this plugin to be placed in init.vim";
+        default = "";
+      };
+
       optional = mkEnableOption "optional" // {
         description = "Don't load by default (load with :packadd)";
       };
 
       plugin = mkOption {
         type = types.package;
+        description = "vim plugin";
+      };
+
+      # Maybe we can merge these runtimes
+      # placeholder for the runtime type
+      runtime = mkOption {
+        type = types.attrsOf types.attrs;
+        default = {};
         description = "vim plugin";
       };
     };
@@ -227,6 +241,7 @@ in {
       configure = cfg.configure // moduleConfigure;
       plugins = cfg.plugins;
       customRC = cfg.extraConfig;
+      runtime = {};
     };
 
   in mkIf cfg.enable {

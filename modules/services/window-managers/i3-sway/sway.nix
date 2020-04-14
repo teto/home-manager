@@ -314,7 +314,9 @@ let
     "") + "\n" + (if cfg.systemdIntegration then ''
       exec "systemctl --user import-environment; systemctl --user start sway-session.target"
     '' else
-      "") + cfg.extraConfig);
+    "")
+    # + cfg.extraConfig
+  );
 
   defaultSwayPackage = pkgs.sway.override {
     extraSessionCommands = cfg.extraSessionCommands;

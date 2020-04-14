@@ -295,6 +295,18 @@ in
         description = "Enable zsh syntax highlighting";
       };
 
+      autosuggestion = {
+        enable = mkOption {
+          default = false;
+          description = "Enable zsh autosuggestions";
+        };
+        highlight = mkOption {
+          default = "cyan";
+          description = "Enable zsh autosuggestions";
+          # AUTOSUGGESTION_HIGHLIGHT_COLOR="fg=cyan"
+        };
+      };
+
       history = mkOption {
         type = historyModule;
         default = {};
@@ -482,9 +494,10 @@ in
         ${optionalString (cfg.enableCompletion && !cfg.oh-my-zsh.enable && !cfg.prezto.enable)
           cfg.completionInit
         }
-
-        ${optionalString cfg.enableAutosuggestions
-          "source ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+        ${optionalString cfg.autosuggestion.enable "
+          source ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+          AUTOSUGGESTION_HIGHLIGHT_COLOR="fg=${cfg.autosuggestion.highlight}
+		"
         }
 
         ${optionalString cfg.enableSyntaxHighlighting
