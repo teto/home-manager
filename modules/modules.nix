@@ -48,6 +48,7 @@ let
     (loadModule ./programs/abook.nix { condition = hostPlatform.isLinux; })
     (loadModule ./programs/afew.nix { })
     (loadModule ./programs/alacritty.nix { })
+    (loadModule ./programs/aerc.nix { })
     (loadModule ./programs/alot.nix { })
     (loadModule ./programs/aria2.nix { })
     (loadModule ./programs/astroid.nix { })
