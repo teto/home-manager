@@ -153,8 +153,10 @@ let
     }
   '';
 
-  configFile = pkgs.writeText "i3.conf" ((if cfg.config != null then
-    with cfg.config; ''
+  configFile = pkgs.writeText "i3.conf" (cfg.extraConfig + "\n" + (if cfg.config != null then
+  with cfg.config;
+       ''
+
       font pango:${concatStringsSep ", " fonts}
       floating_modifier ${floating.modifier}
       new_window ${if window.titlebar then "normal" else "pixel"} ${
@@ -191,7 +193,7 @@ let
       ${concatStringsSep "\n" (map startupEntryStr startup)}
     ''
   else
-    "") + "\n" + cfg.extraConfig);
+    ""));
 
 in {
   options = {

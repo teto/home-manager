@@ -46,6 +46,7 @@ let
     ) // {
       General = {
         StartWithLastProfile = 1;
+        Version = 2;
       };
     };
 
@@ -200,6 +201,7 @@ in
             path = mkOption {
               type = types.str;
               default = name;
+              example = "~/.mozilla/firefox";
               description = "Profile path.";
             };
 

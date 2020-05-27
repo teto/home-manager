@@ -242,7 +242,8 @@ let
   '';
 
   configFile = pkgs.writeText "sway.conf" ((if cfg.config != null then
-    with cfg.config; ''
+  with cfg.config;
+      cfg.extraConfig +  ''
       font pango:${concatStringsSep ", " fonts}
       floating_modifier ${floating.modifier}
       default_border ${if window.titlebar then "normal" else "pixel"} ${
@@ -288,7 +289,9 @@ let
     "") + "\n" + (if cfg.systemdIntegration then ''
       exec "systemctl --user import-environment; systemctl --user start sway-session.target"
     '' else
-      "") + cfg.extraConfig);
+    "")
+    # + cfg.extraConfig
+  );
 
   defaultSwayPackage = pkgs.sway.override {
     extraSessionCommands = cfg.extraSessionCommands;
