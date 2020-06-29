@@ -42,17 +42,6 @@ let cfg = config.services.autoUpgrade; in
         '';
       };
 
-      # dates = mkOption {
-      #   default = "04:40";
-      #   type = types.str;
-      #   description = ''
-      #     Specification (in the format described by
-      #     <citerefentry><refentrytitle>systemd.time</refentrytitle>
-      #     <manvolnum>7</manvolnum></citerefentry>) of the time at
-      #     which the update will occur.
-      #   '';
-      # };
-
       frequency = mkOption {
         type = types.str;
         default = "*:0/5";
@@ -60,23 +49,7 @@ let cfg = config.services.autoUpgrade; in
           How often to update home-manager
         '';
       };
-
-
-      # randomizedDelaySec = mkOption {
-      #   default = "0";
-      #   type = types.str;
-      #   example = "45min";
-      #   description = ''
-      #     Add a randomized delay before each automatic upgrade.
-      #     The delay will be chozen between zero and this value.
-      #     This value must be a time span in the format specified by
-      #     <citerefentry><refentrytitle>systemd.time</refentrytitle>
-      #     <manvolnum>7</manvolnum></citerefentry>
-      #   '';
-      # };
-
     };
-
   };
 
   config = lib.mkIf cfg.enable {
@@ -91,35 +64,24 @@ let cfg = config.services.autoUpgrade; in
 
 
     systemd.user.services.home-manager-update = {
+      Unit = {
+        Description = "Home-manager update";
+      };
 
       Service = {
-        Description = "Home-manager update";
-
-        X-StopOnRemoval = false;
-
         Type = "oneshot";
-
-        # environment = 
-        #   { inherit (config.environment.sessionVariables) NIX_PATH;
-        #     # HOME = "/root";
-        #   } // config.networking.proxy.envVars;
-
-        # path = with pkgs; [ coreutils gnutar xz.bin gzip gitMinimal ];
+        # always forbidden for oneshot
+        Restart = "on-abort";
+        RestartSec = 12;
 
         ExecStart = let
-            # -I nixpkgs=/home/teto/nixpkgs -I nixos-config=/home/teto/home/nixpkgs/configuration-xps.nix
-            home-manager = "${config.home.path}/bin/home-manager";
+            home-manager = "${pkgs.home-manager}/bin/home-manager";
           in ''
               ${home-manager} switch ${toString cfg.flags}
           '';
-
-        # ExecStart = "${pkgs.gmailieer}/bin/gmi sync";
-        # WorkingDirectory = account.maildir.absPath;
-        # startAt = cfg.dates;
       };
     };
 
-    # systemd.timers.nixos-upgrade.timerConfig.RandomizedDelaySec = cfg.randomizedDelaySec;
     systemd.user.timers.autoUpgrade = {
       Unit = { Description = "Home-manager periodic update"; };
       Timer = {
@@ -128,8 +90,5 @@ let cfg = config.services.autoUpgrade; in
       };
       Install = { WantedBy = [ "timers.target" ]; };
     };
-
   };
-
 }
-
