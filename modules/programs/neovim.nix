@@ -26,14 +26,19 @@ let
 
   pluginWithConfigType = types.submodule {
     options = {
-      plugin = mkOption {
-        type = types.package;
-        description = "vim plugin";
-      };
       config = mkOption {
         type = types.lines;
         description = "vimscript for this plugin to be placed in init.vim";
         default = "";
+      };
+
+      optional = mkEnableOption "optional" // {
+        description = "test";
+      };
+
+      plugin = mkOption {
+        type = types.package;
+        description = "vim plugin";
       };
     };
   };
@@ -50,9 +55,11 @@ let
     optionalAttrs (cfg.extraConfig != "" || (lib.filter (hasAttr "config") cfg.plugins) != []) {
       customRC = cfg.extraConfig +
         pkgs.lib.concatMapStrings pluginConfig cfg.plugins;
-    }
-    // optionalAttrs (cfg.plugins != [] ) {
-      packages.home-manager.start = map (x: x.plugin or x) cfg.plugins;
+
+      packages.home-manager = {
+        start = map (x: if x.plugin && x.optional == true then null else (x.plugin or x) cfg.plugins;
+        opt = map (x: if x.plugin && x.optional == true then x.plugin else null) cfg.plugins;
+      };
     };
     extraMakeWrapperArgs = lib.optionalString (cfg.extraPackages != [])
       '' --prefix PATH : "${lib.makeBinPath cfg.extraPackages}"'';
