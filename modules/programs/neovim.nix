@@ -56,9 +56,9 @@ let
       customRC = cfg.extraConfig +
         pkgs.lib.concatMapStrings pluginConfig cfg.plugins;
 
-      packages.home-manager = {
-        start = map (x: if x.plugin && x.optional == true then null else (x.plugin or x) cfg.plugins;
-        opt = map (x: if x.plugin && x.optional == true then x.plugin else null) cfg.plugins;
+        packages.home-manager = {
+        start = filter (f: f != null) (map (x: if x ? plugin && x.optional == true then null else (x.plugin or x)) cfg.plugins);
+        opt = filter (f: f != null) (map (x: if x ? plugin && x.optional == true then x.plugin else null) cfg.plugins);
       };
     };
     extraMakeWrapperArgs = lib.optionalString (cfg.extraPackages != [])
