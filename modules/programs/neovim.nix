@@ -66,6 +66,7 @@ let
           cfg.plugins);
     };
     beforePlugins = "";
+    customRC = pkgs.lib.concatMapStrings pluginConfig cfg.plugins;
   };
 
   extraMakeWrapperArgs = lib.optionalString (cfg.extraPackages != [ ])
@@ -158,6 +159,15 @@ in {
         description = "Resulting customized neovim package.";
       };
 
+      generatedInitrc = mkOption {
+        type = types.lines;
+        visible = true;
+        readOnly = true;
+        description = ''
+          Use this
+        '';
+      };
+
       configure = mkOption {
         type = types.attrsOf types.anything;
         default = { };
@@ -203,6 +213,17 @@ in {
         '';
       };
 
+      extraLuaConfig = mkOption {
+        type = types.lines;
+        default = "";
+        example = ''
+          vim.lsp.set_log_level("info")
+        '';
+        description = ''
+          Custom lua lines.
+        '';
+      };
+
       extraPackages = mkOption {
         type = with types; listOf package;
         default = [ ];
@@ -238,7 +259,12 @@ in {
     neovimConfig = pkgs.neovimUtils.makeNeovimConfig {
       inherit (cfg)
         extraPython3Packages withPython3 withNodeJs withRuby viAlias vimAlias;
+
+      # inherit customRC;
+
+      luaRc = cfg.extraLuaConfig;
       configure = cfg.configure // moduleConfigure;
+
       plugins = cfg.plugins;
       customRC = cfg.extraConfig;
       runtime = {};
@@ -254,11 +280,14 @@ in {
         configure.customRC -> programs.neovim.extraConfig
     '';
 
+    programs.neovim.generatedInitrc = neovimConfig.neovimRcContent;
+
     home.packages = [ cfg.finalPackage ];
 
     xdg.configFile = mkIf (neovimConfig.neovimRcContent != "") {
       "nvim/init.vim".text = neovimConfig.neovimRcContent;
     };
+    # xdg.configFile."nvim/init.generated.lua".text = neovimConfig.luaRc;
     programs.neovim.finalPackage = pkgs.wrapNeovimUnstable cfg.package
       (neovimConfig // {
         wrapperArgs = (lib.escapeShellArgs neovimConfig.wrapperArgs) + " "
