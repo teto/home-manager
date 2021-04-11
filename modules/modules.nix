@@ -70,6 +70,7 @@ let
     (loadModule ./programs/eclipse.nix { })
     (loadModule ./programs/emacs.nix { })
     (loadModule ./programs/exa.nix { })
+    (loadModule ./programs/fcitx.nix { })
     (loadModule ./programs/feh.nix { })
     (loadModule ./programs/firefox.nix { })
     (loadModule ./programs/fish.nix { })

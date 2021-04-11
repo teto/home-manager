@@ -3,12 +3,14 @@
 with lib;
 
 let
-  im = config.i18n.inputMethod;
+  # im = config.i18n.inputMethod;
+  im = config.programs;
   cfg = im.fcitx5;
   fcitx5Package = pkgs.fcitx5-with-addons.override { inherit (cfg) addons; };
 in
   {
-    options = {
+    options.programs.fcitx5 = {
+      enable = mkEnableOption "fcitx5";
       # i18n.inputMethod.fcitx5 = {
       #   addons = mkOption {
       #     type = with types; listOf package;
@@ -21,10 +23,10 @@ in
       # };
     };
 
-    config = mkIf (im.enabled == "fcitx5") {
+    config = mkIf (cfg.enable) {
       # i18n.inputMethod.package = fcitx5Package;
 
-      environment.variables = {
+      home.sessionVariables = {
         GTK_IM_MODULE = "fcitx";
         QT_IM_MODULE = "fcitx";
         XMODIFIERS = "@im=fcitx";
