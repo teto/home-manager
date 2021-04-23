@@ -256,11 +256,10 @@ in {
   };
 
   config = let
+    mergedConfigure = cfg.configure // moduleConfigure;
     neovimConfig = pkgs.neovimUtils.makeNeovimConfig {
       inherit (cfg)
         extraPython3Packages withPython3 withNodeJs withRuby viAlias vimAlias;
-
-      # inherit customRC;
 
       luaRc = cfg.extraLuaConfig;
       configure = cfg.configure // moduleConfigure;
@@ -288,7 +287,9 @@ in {
     xdg.configFile = mkIf (neovimConfig.neovimRcContent != "") {
       "nvim/init.vim".text = neovimConfig.neovimRcContent;
     };
+
     # xdg.configFile."nvim/init.generated.lua".text = neovimConfig.luaRc;
+
     programs.neovim.finalPackage = pkgs.wrapNeovimUnstable cfg.package
       (neovimConfig // {
         wrapperArgs = (lib.escapeShellArgs neovimConfig.wrapperArgs) + " "

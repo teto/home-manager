@@ -154,8 +154,9 @@ let
     }
   '';
 
-  configFile = pkgs.writeText "i3.conf" ((if cfg.config != null then
-    with cfg.config; ''
+  configFile = pkgs.writeText "i3.conf" (cfg.extraConfig + "\n" + (if cfg.config != null then
+  with cfg.config;
+       ''
       ${fontConfigStr fonts}
       floating_modifier ${floating.modifier}
       ${windowBorderString window floating}
