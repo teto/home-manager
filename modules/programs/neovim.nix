@@ -264,6 +264,7 @@ in {
 
       luaRc = cfg.extraLuaConfig;
       configure = cfg.configure // moduleConfigure;
+      # configure = cfg.configure;
 
       plugins = cfg.plugins;
       customRC = cfg.extraConfig;
