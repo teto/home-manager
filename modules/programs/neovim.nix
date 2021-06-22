@@ -66,7 +66,7 @@ let
           cfg.plugins);
     };
     beforePlugins = "";
-    customRC = pkgs.lib.concatMapStrings pluginConfig cfg.plugins;
+    # customRC = pkgs.lib.concatMapStrings pluginConfig cfg.plugins;
   };
 
   extraMakeWrapperArgs = lib.optionalString (cfg.extraPackages != [ ])
