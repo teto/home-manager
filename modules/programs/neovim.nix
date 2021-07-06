@@ -22,7 +22,7 @@ let
         default = "";
       };
 
-      lua = mkOption {
+      luaConfig = mkOption {
         type = types.lines;
         description = "lua for this plugin to be placed in init.vim";
         default = "";
@@ -168,6 +168,16 @@ in {
         '';
       };
 
+
+      rcMode = mkOption {
+        type = types.enum [ "lua" "vim" "vim+lua" "lua+vim"];
+        visible = true;
+        readOnly = true;
+        description = ''
+          Use this
+        '';
+      };
+
       configure = mkOption {
         type = types.attrsOf types.anything;
         default = { };
@@ -256,7 +266,7 @@ in {
   };
 
   config = let
-    mergedConfigure = cfg.configure // moduleConfigure;
+    # mergedConfigure = cfg.configure // moduleConfigure;
     neovimConfig = pkgs.neovimUtils.makeNeovimConfig {
       inherit (cfg)
         extraPython3Packages withPython3 withNodeJs withRuby viAlias vimAlias;
@@ -269,6 +279,9 @@ in {
       customRC = cfg.extraConfig;
       runtime = {};
     };
+    neovimRcLuaContent = ''
+      test
+    '' + cfg.extraLuaConfig;
 
   in mkIf cfg.enable {
     warnings = optional (cfg.configure != { }) ''
@@ -284,8 +297,10 @@ in {
 
     home.packages = [ cfg.finalPackage ];
 
-    xdg.configFile = mkIf (neovimConfig.neovimRcContent != "") {
-      "nvim/init.vim".text = neovimConfig.neovimRcContent;
+    xdg.configFile = {
+      "nvim/init.vim".text = (mkIf (neovimConfig.neovimRcContent != "")
+        neovimConfig.neovimRcContent);
+      "nvim/init2.lua".text = mkIf (neovimRcLuaContent != "") neovimRcLuaContent;
     };
 
     # xdg.configFile."nvim/init.generated.lua".text = neovimConfig.luaRc;
