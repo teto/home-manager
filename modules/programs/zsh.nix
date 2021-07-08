@@ -496,7 +496,7 @@ in
         }
         ${optionalString cfg.autosuggestion.enable "
           source ${pkgs.zsh-autosuggestions}/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-          AUTOSUGGESTION_HIGHLIGHT_COLOR="fg=${cfg.autosuggestion.highlight}
+		  AUTOSUGGESTION_HIGHLIGHT_COLOR=\"fg=${cfg.autosuggestion.highlight}\"
 		"
         }
 
