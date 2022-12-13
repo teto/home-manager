@@ -18,8 +18,8 @@ let
     ./accounts/calendar.nix
     ./accounts/contacts.nix
     ./config/home-cursor.nix
-    ./accounts/calendar.nix
-    ./accounts/contacts.nix
+    # ./accounts/calendar.nix
+    # ./accounts/contacts.nix
     ./config/i18n.nix
     ./files.nix
     ./home-environment.nix
