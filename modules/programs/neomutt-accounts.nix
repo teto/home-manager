@@ -29,34 +29,9 @@ let
   };
 
 in {
-  options.notmuch.neomutt = {
-    enable = mkEnableOption "Notmuch support in NeoMutt" // { default = true; };
-
-    virtualMailboxes = mkOption {
-      type = types.listOf (types.submodule ./notmuch-virtual-mailbox.nix);
-      example = [{
-        name = "My INBOX";
-        query = "tag:inbox";
-      }];
-      default = [{
-        name = "My INBOX";
-        query = "tag:inbox";
-      }];
-      description = "List of virtual mailboxes using Notmuch queries";
-    };
-  };
-
   options.neomutt = {
     enable = mkEnableOption "NeoMutt";
 
-    # TODO we need some logic on how to 
-    externalMta = mkOption {
-      type = types.bool;
-      default = true;
-      description = "Use external smtp";
-    };
-
-<<<<<<< HEAD
     sendMailCommand = mkOption {
       type = types.nullOr types.str;
       default = if config.msmtp.enable then
@@ -74,22 +49,6 @@ in {
         Command to send a mail. If not set, neomutt will be in charge of sending mails.
       '';
     };
-||||||| parent of d7879f6a... now works with gmail
-    sendMailCommand = mkOption {
-      type = types.nullOr types.str;
-      description = ''
-        Command to send a mail. If msmtp is enabled for the account,
-        then this is set to
-        <command>msmtpq --read-envelope-from --read-recipients</command>.
-      '';
-    };
-=======
-    # externalMta = mkOption {
-    #   type = types.bool;
-    #   default = true;
-    #   description = "Use external MTA.";
-    # };
->>>>>>> d7879f6a... now works with gmail
 
     # externalMra = mkOption {
     #   type = types.bool;
@@ -144,14 +103,14 @@ in {
       '';
     };
 
-    sendMailCommand = mkOption {
-      type = types.nullOr types.str;
-      default = null;
-      example = "msmtpq --read-envelope-from --read-recipients";
-      description = ''
-        Command to send a mail. If not set, mutt will be in charge of sending mails.
-      '';
-    };
+    # sendMailCommand = mkOption {
+    #   type = types.nullOr types.str;
+    #   default = null;
+    #   example = "msmtpq --read-envelope-from --read-recipients";
+    #   description = ''
+    #     Command to send a mail. If not set, mutt will be in charge of sending mails.
+    #   '';
+    # };
 
     extraConfig = mkOption {
       type = types.lines;

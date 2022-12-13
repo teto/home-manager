@@ -61,24 +61,22 @@ let
     config = cfg.coc.pluginConfig;
     optional = false;
   };
-
   luaPackages = cfg.finalPackage.unwrapped.lua.pkgs;
   resolvedExtraLuaPackages = cfg.extraLuaPackages luaPackages;
 
-  extraMakeWrapperArgs = lib.optionalString (cfg.extraPackages != [ ])
-    ''--suffix PATH : "${lib.makeBinPath cfg.extraPackages}"'';
-  extraMakeWrapperLuaCArgs =
-    lib.optionalString (resolvedExtraLuaPackages != [ ]) ''
-      --suffix LUA_CPATH ";" "${
+  # TODO pass as lists
+  extraMakeWrapperArgs = lib.optionals (cfg.extraPackages != [ ])
+    [ "--suffix" "PATH" ":" "${lib.makeBinPath cfg.extraPackages}"];
+  extraMakeWrapperLuaCArgs = lib.optionals (cfg.extraLuaPackages != [ ]) [
+    "--suffix" "LUA_CPATH" ";" "${
         lib.concatMapStringsSep ";" luaPackages.getLuaCPath
         resolvedExtraLuaPackages
-      }"'';
-  extraMakeWrapperLuaArgs = lib.optionalString (resolvedExtraLuaPackages != [ ])
-    ''
-      --suffix LUA_PATH ";" "${
+    }"];
+  extraMakeWrapperLuaArgs = lib.optionals (cfg.extraLuaPackages != [ ]) [
+    "--suffix" "LUA_PATH" ";" "${
         lib.concatMapStringsSep ";" luaPackages.getLuaPath
         resolvedExtraLuaPackages
-      }"'';
+    }"];
 in {
   imports = [
     (mkRemovedOptionModule [ "programs" "neovim" "withPython" ]
@@ -413,6 +411,17 @@ in {
       luaPlugins = filter (p: p.type == "lua") pluginsNormalized;
       generatedConfigs.lua = generatedConfigLua;
       generatedConfigLua = lib.concatMapStrings pluginConfigLua luaPlugins;
+
+      # TODO startupCommandsToFlags
+      # "--add-flags" (lib.escapeShellArgs flags)
+      luaRcContent =
+        lib.optionalString (neovimConfig.neovimRcContent != "")
+        "vim.cmd [[source ${
+          pkgs.writeText "nvim-init-home-manager.vim"
+          neovimConfig.neovimRcContent
+        }]]" + lib.optionalString hasLuaConfig config.programs.neovim.generatedConfigs.lua;
+
+      hasLuaConfig = hasAttr "lua" config.programs.neovim.generatedConfigs;
     in
     {
     # warnings = optional (filter (p: isDerivation p) cfg.plugins != []) ''
@@ -434,10 +443,22 @@ in {
     grouped;
 
     home.packages = [ cfg.finalPackage ];
-
     home.sessionVariables = mkIf cfg.defaultEditor { EDITOR = "nvim"; };
 
-    home.shellAliases = mkIf cfg.vimdiffAlias { vimdiff = "nvim -d"; };
+    # TODO setup plugins in that folder.
+    # /home/teto/.local/share/nvim/site/pack/packer
+    # TODO link packpath dirs
+    xdg.dataFile =
+    {
+        # this conflicts with existing paths
+        # TODO should work like stow
+        "nvim/site" = {
+          # text = "toto";
+          source = pkgs.vimUtils.packDir neovimConfig.packpathDirs;
+        };
+      # source = builtins.head neovimConfig.packpathDirs;
+      # recursive = true;
+    };
 
     xdg.configFile =
       let hasLuaConfig = hasAttr "lua" config.programs.neovim.generatedConfigs;
@@ -445,6 +466,9 @@ in {
         # writes runtime
         (map (x: x.runtime) pluginsNormalized) ++ [{
           "nvim/init.lua" = let
+          # mkIf (luaRcContent != "") {
+          #   text = lib.concatStringsSep "\n" (neovimConfig.startupCommands  ++ [ luaRcContent ]);
+          # };
             luaRcContent =
               lib.optionalString (neovimConfig.neovimRcContent != "")
               "vim.cmd [[source ${
@@ -460,13 +484,15 @@ in {
           };
         }]);
 
-    programs.neovim.finalPackage = pkgs.wrapNeovimUnstable cfg.package
+    programs.neovim.finalPackage =
+        pkgs.wrapNeovimUnstable cfg.package
       (neovimConfig // {
         wrapperArgs = (lib.escapeShellArgs
           (neovimConfig.wrapperArgs ++ cfg.extraWrapperArgs)) + " "
           + extraMakeWrapperArgs + " " + extraMakeWrapperLuaCArgs + " "
           + extraMakeWrapperLuaArgs;
         wrapRc = false;
+        wrapStartupCommands = luaRcContent != "";
       });
   });
 }

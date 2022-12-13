@@ -28,7 +28,7 @@ let
         { }
       else
         filterNull {
-          fqdn = account.jmap.host;
+          # fqdn = account.jmap.host;
           session_url = account.jmap.sessionUrl;
         };
 

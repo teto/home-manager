@@ -44,7 +44,10 @@ in {
       plugin = pkgs.vimPlugins.pywal-nvim;
       type = "lua";
     }];
-
+    
+    wayland.windowManager.sway.extraConfig = ''
+      include "$HOME/.cache/wal/colors-sway"
+    '';
     # wal generates and that's the one we should load from /home/teto/.cache/wal/colors.Xresources ~/.Xresources
     xsession.windowManager.i3 = {
       extraConfig = ''
@@ -55,6 +58,7 @@ in {
         set_from_resource $hl           i3wm.color13 #ff0000
       '';
 
+      # we should use an include like for sway ?
       config.colors = {
         focused = {
           border = "$fg-alt";
