@@ -452,12 +452,18 @@ in {
     {
         # this conflicts with existing paths
         # TODO should work like stow
-        "nvim/site" = {
-          # text = "toto";
-          source = pkgs.vimUtils.packDir neovimConfig.packpathDirs;
-        };
+        # "nvim/site" = {
+        #   # text = "toto";
+        #   source = pkgs.vimUtils.packDir neovimConfig.packpathDirs;
+        # };
+      "nvim/site/pack/home-manager" = {
+        # this depends on nixpkgs' hardcoded path to the packdir
+	# /nix/store/91q0snr7xlyn67hnd5fbah4jbi5cgw2m-vim-pack-dir/pack/myNeovimPackages/
+        source = builtins.trace ("${pkgs.vimUtils.packDir neovimConfig.packpathDirs}") "${pkgs.vimUtils.packDir neovimConfig.packpathDirs}/pack/myNeovimPackages";
+	# myNeovimPackages
       # source = builtins.head neovimConfig.packpathDirs;
       # recursive = true;
+      };
     };
 
     xdg.configFile =
@@ -487,10 +493,11 @@ in {
     programs.neovim.finalPackage =
         pkgs.wrapNeovimUnstable cfg.package
       (neovimConfig // {
-        wrapperArgs = (lib.escapeShellArgs
-          (neovimConfig.wrapperArgs ++ cfg.extraWrapperArgs)) + " "
-          + extraMakeWrapperArgs + " " + extraMakeWrapperLuaCArgs + " "
-          + extraMakeWrapperLuaArgs;
+        wrapperArgs = lib.escapeShellArgs (neovimConfig.wrapperArgs
+          ++ extraMakeWrapperArgs ++ extraMakeWrapperLuaCArgs
+          ++ extraMakeWrapperLuaArgs
+      );
+        # we write the init.lua ourself
         wrapRc = false;
         wrapStartupCommands = luaRcContent != "";
       });
