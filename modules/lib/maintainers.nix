@@ -132,6 +132,12 @@
     github = "Janik-Haag";
     githubId = 80165193;
   };
+  eclairevoyant = {
+    name = "éclairevoyant";
+    email = "848000+eclairevoyant@users.noreply.github.com";
+    github = "eclairevoyant";
+    githubId = 848000;
+  };
   jkarlson = {
     email = "jekarlson@gmail.com";
     github = "jkarlson";

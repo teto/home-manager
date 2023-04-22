@@ -227,6 +227,7 @@ let
     ./programs/sqls.nix
     ./programs/ssh.nix
     ./programs/starship.nix
+    ./programs/swappy.nix
     ./programs/swaylock.nix
     ./programs/swayr.nix
     ./programs/taskwarrior.nix
