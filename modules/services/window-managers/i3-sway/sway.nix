@@ -548,6 +548,13 @@ in
       '';
     };
 
+    finalPackage = mkOption {
+      type = types.package;
+      visible = false;
+      readOnly = true;
+      description = "Resulting customized sway package.";
+    };
+
     systemd = {
       enable = mkOption {
         type = types.bool;
@@ -713,17 +720,29 @@ in
           }
         ];
 
-        home.packages = optional (cfg.package != null) cfg.package ++ optional cfg.xwayland pkgs.xwayland;
+      wayland.windowManager.sway.finalPackage = let 
+        swayUnwrapped =
+          if cfg.package == null then pkgs.sway-unwrapped else cfg.package;
+      in pkgs.sway.override {
+              extraSessionCommands = cfg.extraSessionCommands;
+              extraOptions = cfg.extraOptions;
+              withBaseWrapper = cfg.wrapperFeatures.base;
+              withGtkWrapper = cfg.wrapperFeatures.gtk;
+        sway-unwrapped = swayUnwrapped;
+      };
 
-        xdg.configFile."sway/config" = {
-          source = configFile;
-          onChange = lib.optionalString (cfg.package != null) ''
-            swaySocket="''${XDG_RUNTIME_DIR:-/run/user/$UID}/sway-ipc.$UID.$(${pkgs.procps}/bin/pgrep --uid $UID -x sway || true).sock"
-            if [ -S "$swaySocket" ]; then
-              ${cfg.package}/bin/swaymsg -s $swaySocket reload
-            fi
-          '';
-        };
+      home.packages = optional (cfg.package != null) cfg.finalPackage
+        ++ optional cfg.xwayland pkgs.xwayland;
+
+      xdg.configFile."sway/config" = {
+        source = configFile;
+        onChange = lib.optionalString (cfg.package != null) ''
+          swaySocket="''${XDG_RUNTIME_DIR:-/run/user/$UID}/sway-ipc.$UID.$(${pkgs.procps}/bin/pgrep --uid $UID -x sway || true).sock"
+          if [ -S "$swaySocket" ]; then
+            ${cfg.finalPackage}/bin/swaymsg -s $swaySocket reload
+          fi
+        '';
+      };
 
         systemd.user.targets.sway-session = mkIf cfg.systemd.enable {
           Unit = {
