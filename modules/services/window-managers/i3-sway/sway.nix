@@ -349,13 +349,9 @@ in {
 
     package = mkOption {
       type = with types; nullOr package;
-      default = pkgs.sway.override {
-        extraSessionCommands = cfg.extraSessionCommands;
-        extraOptions = cfg.extraOptions;
-        withBaseWrapper = cfg.wrapperFeatures.base;
-        withGtkWrapper = cfg.wrapperFeatures.gtk;
-      };
-      defaultText = literalExpression "${pkgs.sway}";
+      default = pkgs.sway-unwrapped;
+      defaultText = literalExpression "pkgs.sway-unwrapped";
+      example = literalExpression "pkgs.swayfx";
       description = ''
         Sway package to use. Will override the options
         'wrapperFeatures', 'extraSessionCommands', and 'extraOptions'.
@@ -364,6 +360,13 @@ in {
         module to install Sway. Beware setting to `null` will also disable
         reloading Sway when new config is activated.
       '';
+    };
+
+    finalPackage = mkOption {
+      type = types.package;
+      visible = false;
+      readOnly = true;
+      description = "Resulting customized sway package.";
     };
 
     systemd = {
@@ -528,7 +531,18 @@ in {
         }
       ];
 
-      home.packages = optional (cfg.package != null) cfg.package
+      wayland.windowManager.sway.finalPackage = let 
+        swayUnwrapped =
+          if cfg.package == null then pkgs.sway-unwrapped else cfg.package;
+      in pkgs.sway.override {
+              extraSessionCommands = cfg.extraSessionCommands;
+              extraOptions = cfg.extraOptions;
+              withBaseWrapper = cfg.wrapperFeatures.base;
+              withGtkWrapper = cfg.wrapperFeatures.gtk;
+        sway-unwrapped = swayUnwrapped;
+      };
+
+      home.packages = optional (cfg.package != null) cfg.finalPackage
         ++ optional cfg.xwayland pkgs.xwayland;
 
       xdg.configFile."sway/config" = {
@@ -536,7 +550,7 @@ in {
         onChange = lib.optionalString (cfg.package != null) ''
           swaySocket="''${XDG_RUNTIME_DIR:-/run/user/$UID}/sway-ipc.$UID.$(${pkgs.procps}/bin/pgrep --uid $UID -x sway || true).sock"
           if [ -S "$swaySocket" ]; then
-            ${cfg.package}/bin/swaymsg -s $swaySocket reload
+            ${cfg.finalPackage}/bin/swaymsg -s $swaySocket reload
           fi
         '';
       };
