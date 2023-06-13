@@ -36,6 +36,7 @@ let
 
   toKeyValueIfDefined = attrs: generators.toKeyValue { } (definedAttrs attrs);
 
+  #  "highlight_event_days = True"
   genCalendarStr = name: value:
     concatStringsSep "\n" ([
       "[[${name}]]"
@@ -196,6 +197,15 @@ in {
         Configuration options to add to the various sections in the configuration file.
       '';
     };
+    extraConfig = mkOption {
+      type = types.lines;
+      default = "";
+      description = ''
+        Extra configuration lines to append to the khal
+        configuration file.
+      '';
+    };
+
   };
 
   config = mkIf cfg.enable {
@@ -214,6 +224,7 @@ in {
               primaryAccount.primaryCollection;
           };
         }))
+        cfg.extraConfig
       ]);
   };
 }
