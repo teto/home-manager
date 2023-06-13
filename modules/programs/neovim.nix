@@ -61,6 +61,7 @@ let
     config = cfg.coc.pluginConfig;
     optional = false;
   };
+
   luaPackages = cfg.finalPackage.unwrapped.lua.pkgs;
   resolvedExtraLuaPackages = cfg.extraLuaPackages luaPackages;
 
@@ -499,7 +500,6 @@ in {
       );
         # we write the init.lua ourself
         wrapRc = false;
-        wrapStartupCommands = luaRcContent != "";
       });
   });
 }
