@@ -67,6 +67,9 @@ in
 
       Service = {
         Environment = [ "PATH=${config.home.profileDirectory}/bin" ];
+        # ConditionEnvironment = "WAYLAND_DISPLAY";
+
+        # Environment = [ "PATH=${config.home.profileDirectory}/bin:${pkgs.grim}/bin" ];
         ExecStart = "${cfg.package}/bin/flameshot";
         Restart = "on-abort";
 
