@@ -399,6 +399,7 @@ in {
     suppressNotVimlConfig = p:
       if p.type != "viml" then p // { config = null; } else p;
 
+    # TODO strive to remove it
     neovimConfig = pkgs.neovimUtils.makeNeovimConfig {
       inherit (cfg) extraPython3Packages withPython3 withRuby viAlias vimAlias;
       withNodeJs = cfg.withNodeJs || cfg.coc.enable;
@@ -409,20 +410,53 @@ in {
   in mkIf cfg.enable (
     let
 
-      luaPlugins = filter (p: p.type == "lua") pluginsNormalized;
-      generatedConfigs.lua = generatedConfigLua;
-      generatedConfigLua = lib.concatMapStrings pluginConfigLua luaPlugins;
+      # luaPlugins = filter (p: p.type == "lua") pluginsNormalized;
+      # generatedConfigs.lua = generatedConfigLua;
+      # generatedConfigLua = lib.concatMapStrings pluginConfigLua luaPlugins;
 
       # TODO startupCommandsToFlags
       # "--add-flags" (lib.escapeShellArgs flags)
-      luaRcContent =
-        lib.optionalString (neovimConfig.neovimRcContent != "")
-        "vim.cmd [[source ${
-          pkgs.writeText "nvim-init-home-manager.vim"
-          neovimConfig.neovimRcContent
-        }]]" + lib.optionalString hasLuaConfig config.programs.neovim.generatedConfigs.lua;
 
       hasLuaConfig = hasAttr "lua" config.programs.neovim.generatedConfigs;
+
+      # TODO add config for other plugins
+      wrappedNeovim = (pkgs.wrapNeovimUnstable cfg.package {
+        # required by wrapper
+          packpathDirs = {};
+          wrapperArgs = extraMakeWrapperArgs ++ extraMakeWrapperLuaCArgs ++ extraMakeWrapperLuaArgs;
+          # wrapperArgs =
+      }).overrideAttrs(oa: {
+        wrapRc = false;
+        inherit (cfg) withPython3 withRuby viAlias vimAlias;
+        wrapperArgs = extraMakeWrapperArgs ++ extraMakeWrapperLuaCArgs ++ extraMakeWrapperLuaArgs;
+        withNodeJs = cfg.withNodeJs || cfg.coc.enable;
+        generatedWrapperArgs = [];
+        # generatedWrapperArgs = [];
+
+        # ${toShellVar 'makeWrapperArgs' "${lib.escapeShellArgs finalMakeWrapperArgs} ${wrapperArgsStr}"}
+        postBuild = oa.postBuild + ''
+
+          echo "MATT CUSTOM postBUILD"
+
+        '';
+        customRC = cfg.extraConfig;
+
+        # TODO generate error
+        # we could add as wrap args instead
+        # plugins = map suppressNotVimlConfig pluginsNormalized;
+      });
+      # wrappedNeovim =  pkgs.wrapNeovimUnstable cfg.package
+      # (neovimConfig // {
+      #   wrapperArgs =
+      #     # lib.escapeShellArgs (
+      #        # neovimConfig.wrapperArgs  ++
+      #     extraMakeWrapperArgs ++ extraMakeWrapperLuaCArgs ++ extraMakeWrapperLuaArgs
+      #     ;
+      # # );
+      #   # we write the init.lua ourself
+      #   wrapRc = false;
+      # });
+
     in
     {
     # warnings = optional (filter (p: isDerivation p) cfg.plugins != []) ''
@@ -451,16 +485,10 @@ in {
     # TODO link packpath dirs
     xdg.dataFile =
     {
-        # this conflicts with existing paths
-        # TODO should work like stow
-        # "nvim/site" = {
-        #   # text = "toto";
-        #   source = pkgs.vimUtils.packDir neovimConfig.packpathDirs;
-        # };
       "nvim/site/pack/home-manager" = {
         # this depends on nixpkgs' hardcoded path to the packdir
 	# /nix/store/91q0snr7xlyn67hnd5fbah4jbi5cgw2m-vim-pack-dir/pack/myNeovimPackages/
-        source = builtins.trace ("${pkgs.vimUtils.packDir neovimConfig.packpathDirs}") "${pkgs.vimUtils.packDir neovimConfig.packpathDirs}/pack/myNeovimPackages";
+        source = builtins.trace ("${pkgs.vimUtils.packDir packpathDirs}") "${pkgs.vimUtils.packDir packpathDirs}/pack/myNeovimPackages";
 	# myNeovimPackages
       # source = builtins.head neovimConfig.packpathDirs;
       # recursive = true;
@@ -477,13 +505,14 @@ in {
           #   text = lib.concatStringsSep "\n" (neovimConfig.startupCommands  ++ [ luaRcContent ]);
           # };
             luaRcContent =
-              lib.optionalString (neovimConfig.neovimRcContent != "")
+              # wrappedNeovim.customRC
+              lib.optionalString (neovimConfig?neovimRcContent)
+              # neovimConfig.neovimRcContent
               "vim.cmd [[source ${
-                pkgs.writeText "nvim-init-home-manager.vim"
-                neovimConfig.neovimRcContent
-              }]]" + config.programs.neovim.extraLuaConfig
-              + lib.optionalString hasLuaConfig
-              config.programs.neovim.generatedConfigs.lua;
+                pkgs.writeText "nvim-init-home-manager.vim" wrappedNeovim.customRC
+              }]]"
+              + config.programs.neovim.extraLuaConfig
+              + lib.optionalString hasLuaConfig config.programs.neovim.generatedConfigs.lua;
           in mkIf (luaRcContent != "") { text = luaRcContent; };
 
           "nvim/coc-settings.json" = mkIf cfg.coc.enable {
