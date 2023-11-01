@@ -505,7 +505,7 @@ in {
           #   text = lib.concatStringsSep "\n" (neovimConfig.startupCommands  ++ [ luaRcContent ]);
           # };
             luaRcContent =
-              # wrappedNeovim.customRC
+            # wrappedNeovim.customRC
               lib.optionalString (neovimConfig?neovimRcContent)
               # neovimConfig.neovimRcContent
               "vim.cmd [[source ${
