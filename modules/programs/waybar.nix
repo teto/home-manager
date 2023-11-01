@@ -286,8 +286,9 @@ in {
 
       xdg.configFile."waybar/config" = mkIf (settings != [ ]) {
         source = configSource;
+        # || true
         onChange = ''
-          ${pkgs.procps}/bin/pkill -u $USER -USR2 waybar || true
+          ${pkgs.procps}/bin/pkill -u $USER -USR2 waybar
         '';
       };
 
@@ -296,8 +297,9 @@ in {
           cfg.style
         else
           pkgs.writeText "waybar/style.css" cfg.style;
+        # || true
         onChange = ''
-          ${pkgs.procps}/bin/pkill -u $USER -USR2 waybar || true
+          ${pkgs.procps}/bin/pkill -u $USER -USR2 waybar
         '';
       };
     }
@@ -310,6 +312,11 @@ in {
           Documentation = "https://github.com/Alexays/Waybar/wiki";
           PartOf = [ "graphical-session.target" ];
           After = [ "graphical-session-pre.target" ];
+
+#           # Make sure the service is restarted if the settings change.
+#           X-Restart-Triggers =
+#             [ (builtins.hashString "md5" (builtins.toJSON cfg.settings)) ];
+
         };
 
         Service = {
