@@ -15,7 +15,7 @@ in {
     enable = mkEnableOption "the swayr service";
 
     settings = mkOption {
-      type = types.nullOr tomlFormat.type;
+      type = tomlFormat.type;
       default = { };
       example = literalExpression ''
         menu = {
