@@ -400,12 +400,12 @@ in {
       if p.type != "viml" then p // { config = null; } else p;
 
     # TODO strive to remove it
-    neovimConfig = pkgs.neovimUtils.makeNeovimConfig {
-      inherit (cfg) extraPython3Packages withPython3 withRuby viAlias vimAlias;
-      withNodeJs = cfg.withNodeJs || cfg.coc.enable;
-      plugins = map suppressNotVimlConfig pluginsNormalized;
-      customRC = cfg.extraConfig;
-    };
+    # neovimConfig = pkgs.neovimUtils.makeNeovimConfig {
+    #   inherit (cfg) extraPython3Packages withPython3 withRuby viAlias vimAlias;
+    #   withNodeJs = cfg.withNodeJs || cfg.coc.enable;
+    #   plugins = map suppressNotVimlConfig pluginsNormalized;
+    #   customRC = cfg.extraConfig;
+    # };
 
   in mkIf cfg.enable (
     let
@@ -418,12 +418,26 @@ in {
       # "--add-flags" (lib.escapeShellArgs flags)
 
       hasLuaConfig = hasAttr "lua" config.programs.neovim.generatedConfigs;
+    # python3Env = python3Packages.python.withPackages (ps:
+    #   [ ps.pynvim ]
+    #   ++ (extraPython3Packages ps)
+    #   ++ (lib.concatMap (f: f ps) pluginPython3Packages));
 
       # TODO add config for other plugins
-      wrappedNeovim = (pkgs.wrapNeovimUnstable cfg.package {
-        # required by wrapper
-          packpathDirs = {};
+      wrappedNeovim =
+      # let
+      # in
+        (pkgs.wrapNeovimUnstable cfg.package {
+          # required by wrapper
+          # inherit packpathDirs;
+          plugins = pluginsNormalized;
+
+          # todo be careful
           wrapperArgs = extraMakeWrapperArgs ++ extraMakeWrapperLuaCArgs ++ extraMakeWrapperLuaArgs;
+          # python3Env = pkgs.python3.withPackages(cfg.extraPython3Packages);
+          extraPython3Packages = ps: cfg.extraPython3Packages ps ++ [ ps.pynvim ];
+          # python3Env = pkgs.python3.withPackages();
+
           # wrapperArgs =
       }).overrideAttrs(oa: {
         wrapRc = false;
@@ -441,10 +455,16 @@ in {
         '';
         customRC = cfg.extraConfig;
 
+        # python3Env = pkgs.python3.withPackages(cfg.extraPython3Packages);
+
         # TODO generate error
         # we could add as wrap args instead
         # plugins = map suppressNotVimlConfig pluginsNormalized;
       });
+
+      # NVIM_SYSTEM_RPLUGIN_MANIFEST
+      # generatedWrapperArgs
+
       # wrappedNeovim =  pkgs.wrapNeovimUnstable cfg.package
       # (neovimConfig // {
       #   wrapperArgs =
@@ -467,7 +487,10 @@ in {
     # ''
     # ;
 
-    programs.neovim.generatedConfigViml = neovimConfig.neovimRcContent;
+    # NVIM_SYSTEM_RPLUGIN_MANIFEST
+
+    # programs.neovim.generatedConfigViml = neovimConfig.neovimRcContent;
+    programs.neovim.generatedConfigViml = wrappedNeovim.customRC;
 
     programs.neovim.generatedConfigs = let
       grouped = lib.lists.groupBy (x: x.type) pluginsNormalized;
@@ -506,7 +529,8 @@ in {
           # };
             luaRcContent =
             # wrappedNeovim.customRC
-              lib.optionalString (neovimConfig?neovimRcContent)
+              # check if there is
+              lib.optionalString (wrappedNeovim.customRC == "")
               # neovimConfig.neovimRcContent
               "vim.cmd [[source ${
                 pkgs.writeText "nvim-init-home-manager.vim" wrappedNeovim.customRC
