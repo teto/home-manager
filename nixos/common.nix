@@ -85,7 +85,6 @@ in
     backupCommand = mkOption {
       type = types.nullOr (types.either types.str types.path);
       default = null;
-      # example = lib.literalExpression "\${pkgs.trash-cli}/bin/trash";
       example = lib.literalExpression ''"''${pkgs.trash-cli}/bin/trash"'';
       description = ''
         On activation run this command on each existing file
