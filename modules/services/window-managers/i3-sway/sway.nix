@@ -680,9 +680,10 @@ in
           }
         ];
 
-      wayland.windowManager.sway.finalPackage = let 
+      wayland.windowManager.sway.finalPackage = let
         swayUnwrapped =
           if cfg.package == null then pkgs.sway-unwrapped else cfg.package;
+          # TODO regen its name
       in pkgs.sway.override {
               extraSessionCommands = cfg.extraSessionCommands;
               extraOptions = cfg.extraOptions;

@@ -287,6 +287,7 @@ let
       ./programs/superfile.nix
       ./programs/sway-easyfocus.nix
       ./programs/swayimg.nix
+    ./programs/swappy.nix
       ./programs/swaylock.nix
       ./programs/swayr.nix
       ./programs/taskwarrior.nix
