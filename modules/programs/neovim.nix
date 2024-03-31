@@ -413,6 +413,104 @@ in
         config = null;
         optional = false;
         runtime = { };
+    };
+
+    # transform all plugins into a standardized attrset
+    pluginsNormalized =
+      map (x: defaultPlugin // (if (x ? plugin) then x else { plugin = x; }))
+      allPlugins;
+
+    suppressNotVimlConfig = p:
+      if p.type != "viml" then p // { config = null; } else p;
+
+    # TODO strive to remove it
+    # neovimConfig = pkgs.neovimUtils.makeNeovimConfig {
+    #   inherit (cfg) extraPython3Packages withPython3 withRuby viAlias vimAlias;
+    #   withNodeJs = cfg.withNodeJs || cfg.coc.enable;
+    #   plugins = map suppressNotVimlConfig pluginsNormalized;
+    #   customRC = cfg.extraConfig;
+    # };
+
+  in mkIf cfg.enable (
+    let
+
+      # luaPlugins = filter (p: p.type == "lua") pluginsNormalized;
+      # generatedConfigs.lua = generatedConfigLua;
+      # generatedConfigLua = lib.concatMapStrings pluginConfigLua luaPlugins;
+
+      # TODO startupCommandsToFlags
+      # "--add-flags" (lib.escapeShellArgs flags)
+
+      hasLuaConfig = hasAttr "lua" config.programs.neovim.generatedConfigs;
+
+      # TODO add config for other plugins
+      wrappedNeovim =
+      # let
+      # in
+        (pkgs.wrapNeovimUnstable cfg.package {
+          plugins = pluginsNormalized;
+
+          # todo be careful
+          wrapperArgs = cfg.extraWrapperArgs ++ extraMakeWrapperArgs ++ extraMakeWrapperLuaCArgs ++ extraMakeWrapperLuaArgs;
+          # python3Env = pkgs.python3.withPackages(cfg.extraPython3Packages);
+          extraPython3Packages = ps: cfg.extraPython3Packages ps ++ [ ps.pynvim ];
+          # python3Env = pkgs.python3.withPackages();
+          inherit packpathDirs;
+
+          # wrapperArgs =
+      }).overrideAttrs(oa: {
+        wrapRc = false;
+        inherit (cfg) withPython3 withRuby viAlias vimAlias;
+        wrapperArgs = cfg.extraWrapperArgs ++ extraMakeWrapperArgs ++ extraMakeWrapperLuaCArgs ++ extraMakeWrapperLuaArgs;
+        withNodeJs = cfg.withNodeJs || cfg.coc.enable;
+        # ${toShellVar 'makeWrapperArgs' "${lib.escapeShellArgs finalMakeWrapperArgs} ${wrapperArgsStr}"}
+        postBuild = oa.postBuild + ''
+          echo "MATT CUSTOM postBUILD"
+        '';
+
+        customRC = cfg.extraConfig;
+
+        # python3Env = pkgs.python3.withPackages(cfg.extraPython3Packages);
+      });
+
+      myVimPackage = pkgs.neovimUtils.normalizedPluginsToVimPackage pluginsNormalized;
+        # wrappedNeovim.plugins;
+
+      packpathDirs.myNeovimPackages = myVimPackage;
+
+    in
+    {
+    # warnings = optional (filter (p: isDerivation p) cfg.plugins != []) ''
+    #   All plugins should now be of type 'pluginWithConfigType' and not a package anymore, e.g.,
+    #     plugins = [ plenary-nvim ];
+    #   should now be:
+    #     plugins = [ { plugin = plenary-nvim; } ];
+    # ''
+    # ;
+
+    # NVIM_SYSTEM_RPLUGIN_MANIFEST
+
+    # programs.neovim.generatedConfigViml = neovimConfig.neovimRcContent;
+    programs.neovim.generatedConfigViml = wrappedNeovim.customRC;
+
+    programs.neovim.generatedConfigs = let
+      grouped = lib.lists.groupBy (x: x.type) pluginsNormalized;
+      concatConfigs = lib.concatMapStrings (p: p.config);
+      configsOnly = lib.foldl
+        (acc: p: if p.config != null then acc ++ [ p.config ] else acc) [ ];
+    in lib.mapAttrs (name: vals: lib.concatStringsSep "\n" (configsOnly vals))
+    grouped;
+
+    home.packages = [ cfg.finalPackage ];
+    home.sessionVariables = mkIf cfg.defaultEditor { EDITOR = "nvim"; };
+
+    # TODO setup plugins in that folder.
+    # /home/teto/.local/share/nvim/site/pack/packer
+    xdg.dataFile = let
+    in
+    {
+      "nvim/site/pack/home-manager" = {
+        source = builtins.trace ("${pkgs.vimUtils.packDir packpathDirs}") "${pkgs.vimUtils.packDir packpathDirs}/pack/myNeovimPackages";
       };
 
       # transform all plugins into a standardized attrset
