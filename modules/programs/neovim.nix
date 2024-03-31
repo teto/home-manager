@@ -444,7 +444,6 @@ in {
         inherit (cfg) withPython3 withRuby viAlias vimAlias;
         wrapperArgs = extraMakeWrapperArgs ++ extraMakeWrapperLuaCArgs ++ extraMakeWrapperLuaArgs;
         withNodeJs = cfg.withNodeJs || cfg.coc.enable;
-        generatedWrapperArgs = [];
         # generatedWrapperArgs = [];
 
         # ${toShellVar 'makeWrapperArgs' "${lib.escapeShellArgs finalMakeWrapperArgs} ${wrapperArgsStr}"}
@@ -453,6 +452,7 @@ in {
           echo "MATT CUSTOM postBUILD"
 
         '';
+
         customRC = cfg.extraConfig;
 
         # python3Env = pkgs.python3.withPackages(cfg.extraPython3Packages);

@@ -81,7 +81,7 @@ in {
         lib.platforms.linux)
     ];
 
-    systemd.user.services.mbsync = {
+    systemd.user.services.mbsync = mkDefault {
       Unit = { Description = "mbsync mailbox synchronization"; };
 
       Service = {
