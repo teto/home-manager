@@ -55,7 +55,14 @@ in {
   };
 
   config = mkIf cfg.enable {
-    systemd.user.services.vdirsyncer = {
+    systemd.user.services.vdirsyncer = let
+      notif = ''
+      ${pkgs.dbus}/bin/dbus-send --system \
+        / net.nuetzlich.SystemNotifications.Notify \
+        "string:Problem detected with disk: $SMARTD_DEVICESTRING" \
+        "string:Warning message from smartd is: $SMARTD_MESSAGE"
+    '';
+    in {
       Unit = {
         Description = "vdirsyncer calendar&contacts synchronization";
         PartOf = [ "network-online.target" ];
@@ -72,7 +79,8 @@ in {
       };
     };
 
-    systemd.user.timers.vdirsyncer = {
+    systemd.user.timers.vdirsyncer =
+    {
       Unit = { Description = "vdirsyncer calendar&contacts synchronization"; };
 
       Timer = {
