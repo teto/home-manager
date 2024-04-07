@@ -418,22 +418,16 @@ in {
       # "--add-flags" (lib.escapeShellArgs flags)
 
       hasLuaConfig = hasAttr "lua" config.programs.neovim.generatedConfigs;
-    # python3Env = python3Packages.python.withPackages (ps:
-    #   [ ps.pynvim ]
-    #   ++ (extraPython3Packages ps)
-    #   ++ (lib.concatMap (f: f ps) pluginPython3Packages));
 
       # TODO add config for other plugins
       wrappedNeovim =
       # let
       # in
         (pkgs.wrapNeovimUnstable cfg.package {
-          # required by wrapper
-          # inherit packpathDirs;
           plugins = pluginsNormalized;
 
           # todo be careful
-          wrapperArgs = extraMakeWrapperArgs ++ extraMakeWrapperLuaCArgs ++ extraMakeWrapperLuaArgs;
+          wrapperArgs = cfg.extraWrapperArgs ++ extraMakeWrapperArgs ++ extraMakeWrapperLuaCArgs ++ extraMakeWrapperLuaArgs;
           # python3Env = pkgs.python3.withPackages(cfg.extraPython3Packages);
           extraPython3Packages = ps: cfg.extraPython3Packages ps ++ [ ps.pynvim ];
           # python3Env = pkgs.python3.withPackages();
@@ -442,40 +436,18 @@ in {
       }).overrideAttrs(oa: {
         wrapRc = false;
         inherit (cfg) withPython3 withRuby viAlias vimAlias;
-        wrapperArgs = extraMakeWrapperArgs ++ extraMakeWrapperLuaCArgs ++ extraMakeWrapperLuaArgs;
+        wrapperArgs = cfg.extraWrapperArgs ++ extraMakeWrapperArgs ++ extraMakeWrapperLuaCArgs ++ extraMakeWrapperLuaArgs;
         withNodeJs = cfg.withNodeJs || cfg.coc.enable;
-        # generatedWrapperArgs = [];
-
         # ${toShellVar 'makeWrapperArgs' "${lib.escapeShellArgs finalMakeWrapperArgs} ${wrapperArgsStr}"}
         postBuild = oa.postBuild + ''
-
           echo "MATT CUSTOM postBUILD"
-
         '';
 
         customRC = cfg.extraConfig;
 
         # python3Env = pkgs.python3.withPackages(cfg.extraPython3Packages);
-
-        # TODO generate error
-        # we could add as wrap args instead
-        # plugins = map suppressNotVimlConfig pluginsNormalized;
       });
 
-      # NVIM_SYSTEM_RPLUGIN_MANIFEST
-      # generatedWrapperArgs
-
-      # wrappedNeovim =  pkgs.wrapNeovimUnstable cfg.package
-      # (neovimConfig // {
-      #   wrapperArgs =
-      #     # lib.escapeShellArgs (
-      #        # neovimConfig.wrapperArgs  ++
-      #     extraMakeWrapperArgs ++ extraMakeWrapperLuaCArgs ++ extraMakeWrapperLuaArgs
-      #     ;
-      # # );
-      #   # we write the init.lua ourself
-      #   wrapRc = false;
-      # });
 
     in
     {
@@ -505,16 +477,14 @@ in {
 
     # TODO setup plugins in that folder.
     # /home/teto/.local/share/nvim/site/pack/packer
-    # TODO link packpath dirs
-    xdg.dataFile =
+    xdg.dataFile = let
+      myVimPackage = pkgs.neovimUtils.normalizedPluginsToVimPackage wrappedNeovim.plugins;
+
+      packpathDirs.myNeovimPackages = myVimPackage;
+    in
     {
       "nvim/site/pack/home-manager" = {
-        # this depends on nixpkgs' hardcoded path to the packdir
-	# /nix/store/91q0snr7xlyn67hnd5fbah4jbi5cgw2m-vim-pack-dir/pack/myNeovimPackages/
         source = builtins.trace ("${pkgs.vimUtils.packDir packpathDirs}") "${pkgs.vimUtils.packDir packpathDirs}/pack/myNeovimPackages";
-	# myNeovimPackages
-      # source = builtins.head neovimConfig.packpathDirs;
-      # recursive = true;
       };
     };
 
@@ -544,15 +514,17 @@ in {
           };
         }]);
 
-    programs.neovim.finalPackage =
-        pkgs.wrapNeovimUnstable cfg.package
-      (neovimConfig // {
-        wrapperArgs = lib.escapeShellArgs (neovimConfig.wrapperArgs
-          ++ extraMakeWrapperArgs ++ extraMakeWrapperLuaCArgs
-          ++ extraMakeWrapperLuaArgs
-      );
-        # we write the init.lua ourself
-        wrapRc = false;
-      });
+    # programs.neovim.finalPackage =
+    #     pkgs.wrapNeovimUnstable cfg.package
+    #   (neovimConfig // {
+    #     wrapperArgs = lib.escapeShellArgs (neovimConfig.wrapperArgs
+    #       ++ extraMakeWrapperArgs ++ extraMakeWrapperLuaCArgs
+    #       ++ extraMakeWrapperLuaArgs
+    #   );
+    #     # we write the init.lua ourself
+    #     wrapRc = false;
+    #   });
+
+    programs.neovim.finalPackage = wrappedNeovim;
   });
 }
