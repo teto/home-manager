@@ -3,9 +3,15 @@
 let
 
   cfg = config.services.swaync;
-
   jsonFormat = pkgs.formats.json { };
 
+  settings = cfg.settings // { "$schema" = cfg.schema; };
+  configFile = pkgs.writeTextFile rec {
+    name = "swaync/config.json";
+    text = builtins.readFile (jsonFormat.generate name settings);
+    # TODO uncomment once version higher than 0.9.0
+    # checkPhase = "${pkgs.check-jsonschema}/bin/check-jsonschema --schemafile ${settings."$schema"} $out ";
+  };
 in {
   meta.maintainers = [ lib.hm.maintainers.abayomi185 ];
 
@@ -13,6 +19,19 @@ in {
     enable = lib.mkEnableOption "Swaync notification daemon";
 
     package = lib.mkPackageOption pkgs "swaynotificationcenter" { };
+
+    systemd = {
+      enable = lib.mkEnableOption "Systemd integration";
+
+      target = lib.mkOption {
+        type = lib.types.str;
+        default = "graphical-session.target";
+        example = "sway-session.target";
+        description = ''
+          Systemd target to bind to.
+        '';
+      };
+    };
 
     style = lib.mkOption {
       type = lib.types.nullOr (lib.types.either lib.types.path lib.types.lines);
@@ -41,6 +60,16 @@ in {
         for the documentation.
 
         If the value is set to a path literal, then the path will be used as the CSS file.
+
+      '';
+    };
+
+
+    schema = lib.mkOption {
+      default = "${cfg.package}/etc/xdg/swaync/configSchema.json";
+      type = lib.types.path;
+      description = ''
+        Schema to validate the configuration.
       '';
     };
 
@@ -81,8 +110,7 @@ in {
     home.packages = [ cfg.package pkgs.at-spi2-core ];
 
     xdg.configFile = {
-      "swaync/config.json".source =
-        jsonFormat.generate "config.json" cfg.settings;
+      "swaync/config.json".source = configFile;
       "swaync/style.css" = lib.mkIf (cfg.style != null) {
         source = if builtins.isPath cfg.style || lib.isStorePath cfg.style then
           cfg.style
@@ -98,15 +126,24 @@ in {
         PartOf = [ "graphical-session.target" ];
         After = [ "graphical-session-pre.target" ];
         ConditionEnvironment = "WAYLAND_DISPLAY";
+
+        X-Restart-Triggers =
+          [ "${config.xdg.configFile."swaync/config.json".source}" ]
+          ++ lib.optional (cfg.style != null)
+          "${config.xdg.configFile."swaync/style.css".source}";
       };
 
       Service = {
         Type = "dbus";
         BusName = "org.freedesktop.Notifications";
         ExecStart = "${cfg.package}/bin/swaync";
+        ExecReload = [ "${cfg.package}/bin/swaync-client --reload-config" ]
+          ++ lib.optional (cfg.style != null)
+          "${cfg.package}/bin/swaync-client --reload-css";
         Restart = "on-failure";
       };
 
+      # Install.WantedBy = [ cfg.systemd.target ];
       Install.WantedBy = [ "graphical-session.target" ];
     };
   };
