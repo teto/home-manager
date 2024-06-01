@@ -114,6 +114,10 @@ in {
         Type = "simple";
         Restart = "always";
         # swayidle executes commands using "sh -c", so the PATH needs to contain a shell.
+        # TODO take swaymsg package from sway module
+        # Environment = [ "PATH=${makeBinPath [ pkgs.bash pkgs.sway ]}" ];
+        # ExecStart =
+        #   "${cfg.package}/bin/swayidle -w ${concatStringsSep " " args}";
         Environment = [ "PATH=${makeBinPath [ pkgs.bash ]}" ];
         ExecStart = let
           mkTimeout = t:
