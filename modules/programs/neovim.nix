@@ -431,6 +431,7 @@ in {
           # python3Env = pkgs.python3.withPackages(cfg.extraPython3Packages);
           extraPython3Packages = ps: cfg.extraPython3Packages ps ++ [ ps.pynvim ];
           # python3Env = pkgs.python3.withPackages();
+          inherit packpathDirs;
 
           # wrapperArgs =
       }).overrideAttrs(oa: {
@@ -448,6 +449,10 @@ in {
         # python3Env = pkgs.python3.withPackages(cfg.extraPython3Packages);
       });
 
+      myVimPackage = pkgs.neovimUtils.normalizedPluginsToVimPackage pluginsNormalized;
+        # wrappedNeovim.plugins;
+
+      packpathDirs.myNeovimPackages = myVimPackage;
 
     in
     {
@@ -478,9 +483,6 @@ in {
     # TODO setup plugins in that folder.
     # /home/teto/.local/share/nvim/site/pack/packer
     xdg.dataFile = let
-      myVimPackage = pkgs.neovimUtils.normalizedPluginsToVimPackage wrappedNeovim.plugins;
-
-      packpathDirs.myNeovimPackages = myVimPackage;
     in
     {
       "nvim/site/pack/home-manager" = {
