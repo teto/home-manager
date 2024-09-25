@@ -490,6 +490,14 @@ in {
       };
     };
 
+    # link the packpath in expected folder so that even unwrapped neovim can pick
+    # home-manager's plugins
+    xdg.dataFile = mkMerge (mapAttrsToList (name: val: {
+      "nvim/site" = {
+        source = pkgs.vimUtils.packDir neovimConfig.packpathDirs;
+      };
+    }) neovimConfig.packpathDirs);
+
     xdg.configFile =
       let hasLuaConfig = hasAttr "lua" config.programs.neovim.generatedConfigs;
       in mkMerge (
