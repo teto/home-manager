@@ -413,28 +413,31 @@ in
       if p.type != "viml" then p // { config = null; } else p;
 
     neovimConfig = pkgs.neovimUtils.makeNeovimConfig {
+    neovimConfig = pkgs.wrapNeovimUnstable cfg.package {
       inherit (cfg) extraPython3Packages withPython3 withRuby viAlias vimAlias;
       withNodeJs = cfg.withNodeJs || cfg.coc.enable;
       plugins = map suppressNotVimlConfig pluginsNormalized;
-      customRC = cfg.extraConfig;
-    };
-
-    wrappedNeovim' = pkgs.wrapNeovimUnstable cfg.package (neovimConfig // {
-      wrapperArgs =
-        (lib.escapeShellArgs (neovimConfig.wrapperArgs ++ cfg.extraWrapperArgs))
-        + " " + extraMakeWrapperArgs + " " + extraMakeWrapperLuaCArgs + " "
+      # it gets ignored
+      neovimRcContent = cfg.extraConfig;
+      wrapperArgs = (lib.escapeShellArgs (cfg.extraWrapperArgs)) + " "
+        + extraMakeWrapperArgs + " " + extraMakeWrapperLuaCArgs + " "
         + extraMakeWrapperLuaArgs;
       wrapRc = false;
-    });
+    };
+
+    wrappedNeovim' = neovimConfig;
   in mkIf cfg.enable {
 
     programs.neovim.generatedConfigViml = neovimConfig.neovimRcContent;
 
+      programs.neovim.generatedConfigs =
+        let
     programs.neovim.generatedConfigs = let
       grouped = lib.lists.groupBy (x: x.type) pluginsNormalized;
       concatConfigs = lib.concatMapStrings (p: p.config);
       configsOnly = lib.foldl
         (acc: p: if p.config != null then acc ++ [ p.config ] else acc) [ ];
+        in
     in lib.mapAttrs (name: vals: lib.concatStringsSep "\n" (configsOnly vals))
     grouped;
 
