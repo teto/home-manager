@@ -339,7 +339,8 @@ let
     ./services/mpd-mpris.nix
     ./services/mpris-proxy.nix
     ./services/muchsync.nix
-    ./services/mujmap.nix
+    # moved to my dotfiles
+    # ./services/mujmap.nix
     ./services/network-manager-applet.nix
     ./services/nextcloud-client.nix
     ./services/nix-gc.nix
