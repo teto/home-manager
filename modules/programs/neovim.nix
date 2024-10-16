@@ -66,18 +66,33 @@ let
   resolvedExtraLuaPackages = cfg.extraLuaPackages luaPackages;
 
   # TODO pass as lists
-  extraMakeWrapperArgs = lib.optionals (cfg.extraPackages != [ ])
-    [ "--suffix" "PATH" ":" "${lib.makeBinPath cfg.extraPackages}"];
-  extraMakeWrapperLuaCArgs = lib.optionals (cfg.extraLuaPackages != [ ]) [
-    "--suffix" "LUA_CPATH" ";" "${
+  # extraMakeWrapperArgs = lib.optionals (cfg.extraPackages != [ ])
+  #   [ "--suffix" "PATH" ":" "${lib.makeBinPath cfg.extraPackages}"];
+  # extraMakeWrapperLuaCArgs = lib.optionals (cfg.extraLuaPackages != [ ]) [
+  #   "--suffix" "LUA_CPATH" ";" "${
+  #       lib.concatMapStringsSep ";" luaPackages.getLuaCPath
+  #       resolvedExtraLuaPackages
+  #   }"];
+  # extraMakeWrapperLuaArgs = lib.optionals (cfg.extraLuaPackages != [ ]) [
+  #   "--suffix" "LUA_PATH" ";" "${
+  #       lib.concatMapStringsSep ";" luaPackages.getLuaPath
+  #       resolvedExtraLuaPackages
+  #   }"];
+
+  extraMakeWrapperArgs = lib.optionalString (cfg.extraPackages != [ ])
+    ''--suffix PATH : "${lib.makeBinPath cfg.extraPackages}"'';
+  extraMakeWrapperLuaCArgs =
+    lib.optionalString (resolvedExtraLuaPackages != [ ]) ''
+      --suffix LUA_CPATH ";" "${
         lib.concatMapStringsSep ";" luaPackages.getLuaCPath
         resolvedExtraLuaPackages
-    }"];
-  extraMakeWrapperLuaArgs = lib.optionals (cfg.extraLuaPackages != [ ]) [
-    "--suffix" "LUA_PATH" ";" "${
+      }"'';
+  extraMakeWrapperLuaArgs = lib.optionalString (resolvedExtraLuaPackages != [ ])
+    ''
+      --suffix LUA_PATH ";" "${
         lib.concatMapStringsSep ";" luaPackages.getLuaPath
         resolvedExtraLuaPackages
-    }"];
+      }"'';
 in {
   imports = [
     (mkRemovedOptionModule [ "programs" "neovim" "withPython" ]
