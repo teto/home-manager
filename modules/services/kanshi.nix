@@ -330,11 +330,11 @@ in {
     })
 
     {
-      xdg.configFile."kanshi/config".text =
-        if cfg.profiles == { } && cfg.extraConfig == "" then
-          directivesStr
-        else
-          oldDirectivesStr;
+      # xdg.configFile."kanshi/config".text =
+      #   if cfg.profiles == { } && cfg.extraConfig == "" then
+      #     directivesStr
+      #   else
+      #     oldDirectivesStr;
 
       systemd.user.services.kanshi = {
         Unit = {
