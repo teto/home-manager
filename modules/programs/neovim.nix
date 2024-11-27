@@ -432,6 +432,9 @@ in
         (cfg.extraWrapperArgs)) + " "
         + extraMakeWrapperArgs + " " + extraMakeWrapperLuaCArgs + " "
         + extraMakeWrapperLuaArgs;
+
+      # autoconfigure = true;
+      autowrapRuntimeDeps = true;
       wrapRc = false;
     };
 
