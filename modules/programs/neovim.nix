@@ -130,15 +130,6 @@ in
         '';
       };
 
-      checkConfig = mkOption {
-        type = types.bool;
-        default = false;
-        description = ''
-          run some tests to check your config is valid.
-          Disable if you rely on an impure behavior.
-        '';
-      };
-
       vimAlias = mkOption {
         type = types.bool;
         default = false;
@@ -432,7 +423,6 @@ in
         + extraMakeWrapperArgs + " " + extraMakeWrapperLuaCArgs + " "
         + extraMakeWrapperLuaArgs;
 
-      # autoconfigure = true;
       autowrapRuntimeDeps = true;
       wrapRc = false;
     };
