@@ -77,6 +77,9 @@ in {
       {
         Type = "oneshot";
         # TODO adjust path
+        # Environment = lib.makeBinPath [
+        #   cfg.package
+        # ];
         ExecStart =
           "${cfg.package}/bin/mujmap -C ${config.accounts.email.maildirBasePath}/fastmail sync ${concatStringsSep " " mujmapOptions}";
       };
