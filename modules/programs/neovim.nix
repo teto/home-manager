@@ -416,9 +416,9 @@ in
 
     neovimConfig = pkgs.wrapNeovimUnstable cfg.package {
       inherit (cfg) extraPython3Packages withPython3 withRuby viAlias vimAlias;
-        withNodeJs = cfg.withNodeJs || cfg.coc.enable;
-      plugins = map suppressNotVimlConfig pluginsNormalized;
-        customRC = cfg.extraConfig;
+      withNodeJs = cfg.withNodeJs || cfg.coc.enable;
+      plugins = []; # map suppressNotVimlConfig pluginsNormalized;
+      customRC = cfg.extraConfig;
       wrapperArgs = (lib.escapeShellArgs
         (cfg.extraWrapperArgs)) + " "
         + extraMakeWrapperArgs + " " + extraMakeWrapperLuaCArgs + " "
@@ -429,6 +429,8 @@ in
     };
 
   in mkIf cfg.enable {
+
+    programs.neovim.extraPackages = neovimConfig.runtimeDeps;
 
     programs.neovim.generatedConfigViml = neovimConfig.neovimRcContent;
 
