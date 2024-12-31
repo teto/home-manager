@@ -6,14 +6,12 @@ let
 
   cfg = config.services.mujmap;
 
-  mujmapAccounts = filter (a: a.mujmap.enable)
-    (attrValues config.accounts.email.accounts);
+  mujmapAccounts =
+    filter (a: a.mujmap.enable) (attrValues config.accounts.email.accounts);
 
-  mujmapOptions =
-       optional (cfg.verbose) "--verbose"
-    ++ optional (cfg.configFile != null) "-C ${cfg.configFile}"
-    ;
-    # ++ [ (concatMapStringsSep " -a" (a: a.name) mujmapAccounts) ];
+  mujmapOptions = optional (cfg.verbose) "--verbose"
+    ++ optional (cfg.configFile != null) "-C ${cfg.configFile}";
+  # ++ [ (concatMapStringsSep " -a" (a: a.name) mujmapAccounts) ];
 in {
   meta.maintainers = [ maintainers.pjones ];
 
@@ -63,28 +61,30 @@ in {
         lib.platforms.linux)
     ];
 
-    systemd.user.services = mapAttrs' (name: account: nameValuePair "mujmap-${name}" {
-      Unit = { Description = "mujmap mailbox synchronization"; };
+    systemd.user.services = mapAttrs' (name: account:
+      nameValuePair "mujmap-${name}" {
+        Unit = { Description = "mujmap mailbox synchronization"; };
 
-      Service =  let
+        Service = let
 
-      # ${pkgs.dbus}/bin/dbus-send --system \
-      #   / net.nuetzlich.SystemNotifications.Notify \
-      #   "string:Problem detected with disk: $SMARTD_DEVICESTRING" \
-      #   "string:Warning message from smartd is: $SMARTD_MESSAGE"
-      # ''}
-      in
-      {
-        Type = "oneshot";
-        # TODO adjust path
-        # Environment = lib.makeBinPath [
-        #   cfg.package
-        # ];
-        ExecStart =
-          "${cfg.package}/bin/mujmap -C ${config.accounts.email.maildirBasePath}/fastmail sync ${concatStringsSep " " mujmapOptions}";
-      };
+          # ${pkgs.dbus}/bin/dbus-send --system \
+          #   / net.nuetzlich.SystemNotifications.Notify \
+          #   "string:Problem detected with disk: $SMARTD_DEVICESTRING" \
+          #   "string:Warning message from smartd is: $SMARTD_MESSAGE"
+          # ''}
+        in {
+          Type = "oneshot";
+          # TODO adjust path
+          # Environment = lib.makeBinPath [
+          #   cfg.package
+          # ];
+          ExecStart =
+            "${cfg.package}/bin/mujmap -C ${config.accounts.email.maildirBasePath}/fastmail sync ${
+              concatStringsSep " " mujmapOptions
+            }";
+        };
 
-    }) config.accounts.email.accounts;
+      }) config.accounts.email.accounts;
 
     systemd.user.timers.mujmap = {
       Unit = { Description = "mujmap mailbox synchronization"; };

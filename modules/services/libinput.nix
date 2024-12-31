@@ -11,9 +11,7 @@ let
   #   ] ++ optional (cfg.verbose) "--verbose"
   #     ++ optional (cfg.configFile != null) "--config ${cfg.configFile}";
 
-in
-
-{
+in {
   meta.maintainers = [ maintainers.teto ];
 
   options.services.touchegg = {
@@ -84,24 +82,22 @@ in
     # add USER to "input" group
     # config.users.users."${config.home.username}" = { }
 
-     extraGroups = [
-       "input"
-     ];
+    extraGroups = [ "input" ];
+  };
+  systemd.user.services.mbsync = {
+    Unit = {
+      Description = "Libinput-gestures";
+      PartOf = [ "graphical-session.target" ];
     };
-    systemd.user.services.mbsync = {
-      Unit = {
-        Description = "Libinput-gestures";
-        PartOf = [ "graphical-session.target" ];
-      };
 
-      Service = {
-        User = cfg.home.username;
-        Type = "oneshot";
-        #  ${concatStringsSep " " mbsyncOptions}";
-        ExecStart = "${cfg.package}/bin/touchegg";
-      };
-      # // (optionalAttrs (cfg.postExec != null) { ExecStartPost = cfg.postExec; })
-      #   // (optionalAttrs (cfg.preExec  != null) { ExecStartPre  = cfg.preExec;  });
+    Service = {
+      User = cfg.home.username;
+      Type = "oneshot";
+      #  ${concatStringsSep " " mbsyncOptions}";
+      ExecStart = "${cfg.package}/bin/touchegg";
     };
+    # // (optionalAttrs (cfg.postExec != null) { ExecStartPost = cfg.postExec; })
+    #   // (optionalAttrs (cfg.preExec  != null) { ExecStartPre  = cfg.preExec;  });
+  };
 }
 
