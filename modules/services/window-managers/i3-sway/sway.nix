@@ -683,16 +683,17 @@ in
       wayland.windowManager.sway.finalPackage = let
         swayUnwrapped =
           if cfg.package == null then pkgs.sway-unwrapped else cfg.package;
-          # TODO regen its name
-      in pkgs.sway.override {
-              extraSessionCommands = cfg.extraSessionCommands;
-              extraOptions = cfg.extraOptions;
-              withBaseWrapper = cfg.wrapperFeatures.base;
-              withGtkWrapper = cfg.wrapperFeatures.gtk;
+        # TODO regen its name
+      in (pkgs.sway.override {
+        extraSessionCommands = cfg.extraSessionCommands;
+        extraOptions = lib.traceValSeq cfg.extraOptions;
+        withBaseWrapper = lib.traceVal cfg.wrapperFeatures.base;
+        withGtkWrapper = cfg.wrapperFeatures.gtk;
         sway-unwrapped = swayUnwrapped;
-      };
+      });
 
-      home.packages = optional (cfg.package != null) cfg.finalPackage
+      home.packages = optional (cfg.package != null)
+        (builtins.trace "${cfg.finalPackage}" cfg.finalPackage)
         ++ optional cfg.xwayland pkgs.xwayland;
 
       xdg.configFile."sway/config" = {

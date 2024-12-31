@@ -82,8 +82,6 @@ let
   resolvedExtraLuaPackages = cfg.extraLuaPackages luaPackages;
 
   extraMakeWrapperArgs = lib.optionalString (
-    cfg.extraPackages != [ ]
-  ) ''--suffix PATH : "${lib.makeBinPath cfg.extraPackages}"'';
   extraMakeWrapperLuaCArgs =
     lib.optionalString (resolvedExtraLuaPackages != [ ])
       ''--suffix LUA_CPATH ";" "${
@@ -417,10 +415,9 @@ in
     neovimConfig = pkgs.wrapNeovimUnstable cfg.package {
       inherit (cfg) extraPython3Packages withPython3 withRuby viAlias vimAlias;
       withNodeJs = cfg.withNodeJs || cfg.coc.enable;
-      plugins = []; # map suppressNotVimlConfig pluginsNormalized;
+      plugins = [ ]; # map suppressNotVimlConfig pluginsNormalized;
       customRC = cfg.extraConfig;
-      wrapperArgs = (lib.escapeShellArgs
-        (cfg.extraWrapperArgs)) + " "
+      wrapperArgs = (lib.escapeShellArgs (cfg.extraWrapperArgs)) + " "
         + extraMakeWrapperArgs + " " + extraMakeWrapperLuaCArgs + " "
         + extraMakeWrapperLuaArgs;
 
@@ -434,6 +431,8 @@ in
 
     programs.neovim.generatedConfigViml = neovimConfig.neovimRcContent;
 
+    # TODO should check autoconfigure to get the generated config
+    # retreive configs from the neovim wrapper
     programs.neovim.generatedConfigs = let
       grouped = lib.lists.groupBy (x: x.type) pluginsNormalized;
       concatConfigs = lib.concatMapStrings (p: p.config);
