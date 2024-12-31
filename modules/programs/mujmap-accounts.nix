@@ -1,4 +1,4 @@
-{ settingsFormat}:
+{ settingsFormat }:
 { config, pkgs, lib, ... }:
 with lib;
 let
@@ -187,11 +187,9 @@ let
       '';
     };
   };
-in
 
-
-  {
-    options.mujmap = with lib; {
+in {
+  options.mujmap = with lib; {
     enable = mkEnableOption "mujmap JMAP synchronization for notmuch";
 
     sync = mkEnableOption "Sync";
