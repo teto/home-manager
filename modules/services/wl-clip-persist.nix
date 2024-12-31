@@ -71,13 +71,14 @@ in
     };
   };
 
+
   config = lib.mkIf cfg.enable {
     assertions = [
       (lib.hm.assertions.assertPlatform "services.wl-clip-persist" pkgs lib.platforms.linux)
     ];
 
-    home.packages = [ cfg.package ];
 
+    home.packages = [ cfg.package ];
     systemd.user.services.wl-clip-persist = {
       Unit = {
         Description = "Wayland clipboard persistence daemon";
