@@ -66,7 +66,6 @@ in
       '';
     };
 
-
     schema = lib.mkOption {
       default = "${cfg.package}/etc/xdg/swaync/configSchema.json";
       type = lib.types.path;

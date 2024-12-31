@@ -50,11 +50,10 @@ in
   config = lib.mkIf cfg.enable {
     home.packages = lib.mkIf (cfg.package != null) [ cfg.package ];
 
-    xdg.configFile."rofi-pass/config" = let text = optionalString (cfg.stores != [ ])
-      ("root=" + (concatStringsSep ":" cfg.stores) + "\n") + cfg.extraConfig
-      + optionalString (cfg.extraConfig != "") "\n";
-    in mkIf (text != "") {
-      inherit text;
-  };
+    xdg.configFile."rofi-pass/config" = let
+      text = optionalString (cfg.stores != [ ])
+        ("root=" + (concatStringsSep ":" cfg.stores) + "\n") + cfg.extraConfig
+        + optionalString (cfg.extraConfig != "") "\n";
+    in mkIf (text != "") { inherit text; };
   };
 }

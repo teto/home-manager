@@ -81,20 +81,5 @@ in
           ];
       };
     };
-
-    systemd.user.timers.vdirsyncer = {
-      Unit = {
-        Description = "vdirsyncer calendar&contacts synchronization";
-      };
-
-      Timer = {
-        OnCalendar = cfg.frequency;
-        Unit = "vdirsyncer.service";
-      };
-
-      Install = {
-        WantedBy = [ "timers.target" ];
-      };
-    };
   };
 }
