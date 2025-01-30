@@ -348,5 +348,6 @@ in
       storageAssertions;
     home.packages = [ cfg.package ];
     xdg.configFile."vdirsyncer/config".source = configFile;
+    xdg.configFile."pimsync/pimsync.conf".source = configFile;
   };
 }
