@@ -412,27 +412,24 @@ in
     suppressNotVimlConfig = p:
       if p.type != "viml" then p // { config = null; } else p;
 
-    neovimConfig = pkgs.wrapNeovimUnstable cfg.package {
+    neovimConfig = pkgs.neovimUtils.makeNeovimConfig {
       inherit (cfg) extraPython3Packages withPython3 withRuby viAlias vimAlias;
       withNodeJs = cfg.withNodeJs || cfg.coc.enable;
-      plugins = [ ]; # map suppressNotVimlConfig pluginsNormalized;
+      plugins = map suppressNotVimlConfig pluginsNormalized;
       customRC = cfg.extraConfig;
-      wrapperArgs = (lib.escapeShellArgs (cfg.extraWrapperArgs)) + " "
-        + extraMakeWrapperArgs + " " + extraMakeWrapperLuaCArgs + " "
-        + extraMakeWrapperLuaArgs;
-
-      autowrapRuntimeDeps = true;
-      wrapRc = false;
     };
 
+    wrappedNeovim' = pkgs.wrapNeovimUnstable cfg.package (neovimConfig // {
+      wrapperArgs =
+        (lib.escapeShellArgs (neovimConfig.wrapperArgs ++ cfg.extraWrapperArgs))
+        + " " + extraMakeWrapperArgs + " " + extraMakeWrapperLuaCArgs + " "
+        + extraMakeWrapperLuaArgs;
+      wrapRc = false;
+    });
   in mkIf cfg.enable {
-
-    programs.neovim.extraPackages = neovimConfig.runtimeDeps;
 
     programs.neovim.generatedConfigViml = neovimConfig.neovimRcContent;
 
-    # TODO should check autoconfigure to get the generated config
-    # retreive configs from the neovim wrapper
     programs.neovim.generatedConfigs = let
       grouped = lib.lists.groupBy (x: x.type) pluginsNormalized;
       concatConfigs = lib.concatMapStrings (p: p.config);
