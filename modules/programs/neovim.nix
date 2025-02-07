@@ -422,6 +422,7 @@ in
         + extraMakeWrapperArgs + " " + extraMakeWrapperLuaCArgs + " "
         + extraMakeWrapperLuaArgs;
       wrapRc = false;
+      wrapPackpath = false;
     };
 
     wrappedNeovim' = neovimConfig;
