@@ -66,6 +66,7 @@ let
       # };
       type = mkOption {
         type = types.enum [
+          "vdir/icalendar"
           "caldav"
           "http"
           "google_calendar"
