@@ -8,7 +8,7 @@ let
 
 in {
   options.pimsync = {
-    enable = mkEnableOption "synchronization using vdirsyncer";
+    enable = mkEnableOption "synchronization using pimsync";
 
     urlCommand = mkOption {
       type = types.nullOr (types.listOf types.str);
