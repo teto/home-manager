@@ -66,6 +66,15 @@ in
         for options.
       '';
     };
+
+    extraConfig = mkOption {
+      default = "";
+      type = types.lines;
+      example = literalExpression ''
+      '';
+      description = "Additional configuration.";
+    };
+
   };
 
   config = mkIf cfg.enable {
@@ -95,5 +104,9 @@ in
     home.file."${configDir}/jj/config.toml" = mkIf (cfg.settings != { }) {
       source = tomlFormat.generate "jujutsu-config" cfg.settings;
     };
+        # )
+        # + cfg.extraConfig
+        # ;
+
   };
 }
