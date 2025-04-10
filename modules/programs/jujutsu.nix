@@ -66,15 +66,6 @@ in
         for options.
       '';
     };
-
-    extraConfig = mkOption {
-      default = "";
-      type = types.lines;
-      example = literalExpression ''
-      '';
-      description = "Additional configuration.";
-    };
-
   };
 
   config = mkIf cfg.enable {

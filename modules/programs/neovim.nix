@@ -82,6 +82,8 @@ let
   resolvedExtraLuaPackages = cfg.extraLuaPackages luaPackages;
 
   extraMakeWrapperArgs = lib.optionalString (
+    cfg.extraPackages != [ ]
+  ) ''--suffix PATH : "${lib.makeBinPath cfg.extraPackages}"'';
   extraMakeWrapperLuaCArgs =
     lib.optionalString (resolvedExtraLuaPackages != [ ])
       ''--suffix LUA_CPATH ";" "${
@@ -402,17 +404,15 @@ in
         config = null;
         optional = false;
         runtime = { };
-    };
+      };
 
-    # transform all plugins into a standardized attrset
-    pluginsNormalized =
-      map (x: defaultPlugin // (if (x ? plugin) then x else { plugin = x; }))
-      allPlugins;
+      # transform all plugins into a standardized attrset
+      pluginsNormalized = map (
+        x: defaultPlugin // (if (x ? plugin) then x else { plugin = x; })
+      ) allPlugins;
 
-    suppressNotVimlConfig = p:
-      if p.type != "viml" then p // { config = null; } else p;
+      suppressNotVimlConfig = p: if p.type != "viml" then p // { config = null; } else p;
 
-    neovimConfig = pkgs.neovimUtils.makeNeovimConfig {
     neovimConfig = pkgs.wrapNeovimUnstable cfg.package {
       inherit (cfg) extraPython3Packages withPython3 withRuby viAlias vimAlias;
       withNodeJs = cfg.withNodeJs || cfg.coc.enable;
@@ -429,22 +429,18 @@ in
     wrappedNeovim' = neovimConfig;
   in mkIf cfg.enable {
 
-    programs.neovim.generatedConfigViml = neovimConfig.neovimRcContent;
+      programs.neovim.generatedConfigViml = neovimConfig.neovimRcContent;
 
       programs.neovim.generatedConfigs =
         let
-    programs.neovim.generatedConfigs = let
-      grouped = lib.lists.groupBy (x: x.type) pluginsNormalized;
-      concatConfigs = lib.concatMapStrings (p: p.config);
-      configsOnly = lib.foldl
-        (acc: p: if p.config != null then acc ++ [ p.config ] else acc) [ ];
+          grouped = lib.lists.groupBy (x: x.type) pluginsNormalized;
+          configsOnly = lib.foldl (acc: p: if p.config != null then acc ++ [ p.config ] else acc) [ ];
         in
-    in lib.mapAttrs (name: vals: lib.concatStringsSep "\n" (configsOnly vals))
-    grouped;
+        lib.mapAttrs (name: vals: lib.concatStringsSep "\n" (configsOnly vals)) grouped;
 
-    home.packages = [ cfg.finalPackage ];
+      home.packages = [ cfg.finalPackage ];
 
-    home.sessionVariables = mkIf cfg.defaultEditor { EDITOR = "nvim"; };
+      home.sessionVariables = mkIf cfg.defaultEditor { EDITOR = "nvim"; };
 
     # TODO setup plugins in that folder.
     # /home/teto/.local/share/nvim/site/pack/packer
@@ -483,6 +479,7 @@ in
       programs.neovim.generatedConfigs =
         let
           grouped = lib.lists.groupBy (x: x.type) pluginsNormalized;
+          concatConfigs = lib.concatMapStrings (p: p.config);
           configsOnly = lib.foldl (acc: p: if p.config != null then acc ++ [ p.config ] else acc) [ ];
         in
         lib.mapAttrs (name: vals: lib.concatStringsSep "\n" (configsOnly vals)) grouped;

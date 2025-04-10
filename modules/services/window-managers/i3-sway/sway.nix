@@ -498,9 +498,13 @@ in
 
     package = mkOption {
       type = with types; nullOr package;
-      default = pkgs.sway-unwrapped;
-      defaultText = literalExpression "pkgs.sway-unwrapped";
-      example = literalExpression "pkgs.swayfx";
+      default = pkgs.sway.override {
+        extraSessionCommands = cfg.extraSessionCommands;
+        extraOptions = cfg.extraOptions;
+        withBaseWrapper = cfg.wrapperFeatures.base;
+        withGtkWrapper = cfg.wrapperFeatures.gtk;
+      };
+      defaultText = lib.literalExpression "${pkgs.sway}";
       description = ''
         Sway package to use. Will override the options
         'wrapperFeatures', 'extraSessionCommands', and 'extraOptions'.
@@ -509,13 +513,6 @@ in
         module to install Sway. Beware setting to `null` will also disable
         reloading Sway when new config is activated.
       '';
-    };
-
-    finalPackage = mkOption {
-      type = types.package;
-      visible = false;
-      readOnly = true;
-      description = "Resulting customized sway package.";
     };
 
     systemd = {
@@ -680,31 +677,17 @@ in
           }
         ];
 
-      wayland.windowManager.sway.finalPackage = let
-        swayUnwrapped =
-          if cfg.package == null then pkgs.sway-unwrapped else cfg.package;
-        # TODO regen its name
-      in (pkgs.sway.override {
-        extraSessionCommands = cfg.extraSessionCommands;
-        extraOptions = lib.traceValSeq cfg.extraOptions;
-        withBaseWrapper = lib.traceVal cfg.wrapperFeatures.base;
-        withGtkWrapper = cfg.wrapperFeatures.gtk;
-        sway-unwrapped = swayUnwrapped;
-      });
+        home.packages = optional (cfg.package != null) cfg.package ++ optional cfg.xwayland pkgs.xwayland;
 
-      home.packages = optional (cfg.package != null)
-        (builtins.trace "${cfg.finalPackage}" cfg.finalPackage)
-        ++ optional cfg.xwayland pkgs.xwayland;
-
-      xdg.configFile."sway/config" = {
-        source = configFile;
-        onChange = lib.optionalString (cfg.package != null) ''
-          swaySocket="''${XDG_RUNTIME_DIR:-/run/user/$UID}/sway-ipc.$UID.$(${pkgs.procps}/bin/pgrep --uid $UID -x sway || true).sock"
-          if [ -S "$swaySocket" ]; then
-            ${cfg.finalPackage}/bin/swaymsg -s $swaySocket reload
-          fi
-        '';
-      };
+        xdg.configFile."sway/config" = {
+          source = configFile;
+          onChange = lib.optionalString (cfg.package != null) ''
+            swaySocket="''${XDG_RUNTIME_DIR:-/run/user/$UID}/sway-ipc.$UID.$(${pkgs.procps}/bin/pgrep --uid $UID -x sway || true).sock"
+            if [ -S "$swaySocket" ]; then
+              ${cfg.package}/bin/swaymsg -s $swaySocket reload
+            fi
+          '';
+        };
 
         systemd.user.targets.sway-session = mkIf cfg.systemd.enable {
           Unit = {
