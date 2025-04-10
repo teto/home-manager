@@ -548,13 +548,6 @@ in
       '';
     };
 
-    finalPackage = mkOption {
-      type = types.package;
-      visible = false;
-      readOnly = true;
-      description = "Resulting customized sway package.";
-    };
-
     systemd = {
       enable = mkOption {
         type = types.bool;
@@ -734,31 +727,17 @@ in
           }
         ];
 
-      wayland.windowManager.sway.finalPackage = let
-        swayUnwrapped =
-          if cfg.package == null then pkgs.sway-unwrapped else cfg.package;
-        # TODO regen its name
-      in (pkgs.sway.override {
-        extraSessionCommands = cfg.extraSessionCommands;
-        extraOptions = lib.traceValSeq cfg.extraOptions;
-        withBaseWrapper = lib.traceVal cfg.wrapperFeatures.base;
-        withGtkWrapper = cfg.wrapperFeatures.gtk;
-        sway-unwrapped = swayUnwrapped;
-      });
+        home.packages = optional (cfg.package != null) cfg.package ++ optional cfg.xwayland pkgs.xwayland;
 
-      home.packages = optional (cfg.package != null)
-        (builtins.trace "${cfg.finalPackage}" cfg.finalPackage)
-        ++ optional cfg.xwayland pkgs.xwayland;
-
-      xdg.configFile."sway/config" = {
-        source = configFile;
-        onChange = lib.optionalString (cfg.package != null) ''
-          swaySocket="''${XDG_RUNTIME_DIR:-/run/user/$UID}/sway-ipc.$UID.$(${pkgs.procps}/bin/pgrep --uid $UID -x sway || true).sock"
-          if [ -S "$swaySocket" ]; then
-            ${cfg.finalPackage}/bin/swaymsg -s $swaySocket reload
-          fi
-        '';
-      };
+        xdg.configFile."sway/config" = {
+          source = configFile;
+          onChange = lib.optionalString (cfg.package != null) ''
+            swaySocket="''${XDG_RUNTIME_DIR:-/run/user/$UID}/sway-ipc.$UID.$(${pkgs.procps}/bin/pgrep --uid $UID -x sway || true).sock"
+            if [ -S "$swaySocket" ]; then
+              ${cfg.package}/bin/swaymsg -s $swaySocket reload
+            fi
+          '';
+        };
 
         systemd.user.targets.sway-session = mkIf cfg.systemd.enable {
           Unit = {
