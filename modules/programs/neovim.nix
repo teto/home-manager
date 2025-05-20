@@ -434,51 +434,6 @@ in
       programs.neovim.generatedConfigs =
         let
           grouped = lib.lists.groupBy (x: x.type) pluginsNormalized;
-          configsOnly = lib.foldl (acc: p: if p.config != null then acc ++ [ p.config ] else acc) [ ];
-        in
-        lib.mapAttrs (name: vals: lib.concatStringsSep "\n" (configsOnly vals)) grouped;
-
-      home.packages = [ cfg.finalPackage ];
-
-      home.sessionVariables = mkIf cfg.defaultEditor { EDITOR = "nvim"; };
-
-    # TODO setup plugins in that folder.
-    # /home/teto/.local/share/nvim/site/pack/packer
-    xdg.dataFile = let
-    in
-    {
-      "nvim/site/pack/home-manager" = {
-        source = builtins.trace ("${pkgs.vimUtils.packDir packpathDirs}") "${pkgs.vimUtils.packDir packpathDirs}/pack/myNeovimPackages";
-      };
-
-      # transform all plugins into a standardized attrset
-      pluginsNormalized = map (
-        x: defaultPlugin // (if (x ? plugin) then x else { plugin = x; })
-      ) allPlugins;
-
-      suppressNotVimlConfig = p: if p.type != "viml" then p // { config = null; } else p;
-
-    neovimConfig = pkgs.wrapNeovimUnstable cfg.package {
-      inherit (cfg) extraPython3Packages withPython3 withRuby viAlias vimAlias;
-      withNodeJs = cfg.withNodeJs || cfg.coc.enable;
-      plugins = map suppressNotVimlConfig pluginsNormalized;
-      # it gets ignored
-      neovimRcContent = cfg.extraConfig;
-      wrapperArgs = (lib.escapeShellArgs (cfg.extraWrapperArgs)) + " "
-        + extraMakeWrapperArgs + " " + extraMakeWrapperLuaCArgs + " "
-        + extraMakeWrapperLuaArgs;
-      wrapRc = false;
-      wrapPackpath = false;
-    };
-
-    wrappedNeovim' = neovimConfig;
-  in mkIf cfg.enable {
-
-      programs.neovim.generatedConfigViml = neovimConfig.neovimRcContent;
-
-      programs.neovim.generatedConfigs =
-        let
-          grouped = lib.lists.groupBy (x: x.type) pluginsNormalized;
           concatConfigs = lib.concatMapStrings (p: p.config);
           configsOnly = lib.foldl (acc: p: if p.config != null then acc ++ [ p.config ] else acc) [ ];
         in
