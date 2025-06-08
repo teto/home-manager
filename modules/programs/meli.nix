@@ -13,6 +13,8 @@ let
     mkIf
     ;
 
+  tomlFormat = pkgs.formats.toml { };
+
   enabledAccounts = lib.attrsets.filterAttrs (
     name: value: value.meli.enable or false
   ) config.accounts.email.accounts;
@@ -74,7 +76,7 @@ in
 
       settings = mkOption {
         type = types.submodule {
-          freeformType = (pkgs.formats.toml { }).type;
+          freeformType = tomlFormat.type;
           options = {
             shortcuts = mkOption {
               type = types.submodule {
@@ -175,6 +177,12 @@ in
                   };
                 };
                 description = "Folder display name";
+              };
+
+              settings = mkOption {
+                type = tomlFormat.type;
+                default = { };
+                description = "Account specific meli configuration";
               };
             };
           }
