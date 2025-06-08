@@ -95,9 +95,9 @@ in
     home.file."${configDir}/jj/config.toml" = mkIf (cfg.settings != { }) {
       source = tomlFormat.generate "jujutsu-config" cfg.settings;
     };
-        # )
-        # + cfg.extraConfig
-        # ;
+    # )
+    # + cfg.extraConfig
+    # ;
 
   };
 }

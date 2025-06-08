@@ -9,7 +9,9 @@
     })
   ];
 
-  programs.claude-code = { enable = true; };
+  programs.claude-code = {
+    enable = true;
+  };
 
   nmt.script = ''
     assertFileRegex activate "claude config set -g autoUpdaterStatus disabled"

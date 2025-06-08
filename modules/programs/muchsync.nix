@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -16,9 +21,9 @@ let
   #   in
   #     "${key}=${tweakVal value}";
 
-in {
+in
+{
 
   # Since muchsync replicates the tags in the notmuch database itself, you should consider disabling maildir flag synchronization by executing:
   # notmuch config set maildir.synchronize_flags=false
 }
-

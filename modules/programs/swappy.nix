@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -10,7 +15,8 @@ let
 
   iniFile = iniFormat.generate "config" cfg.settings;
 
-in {
+in
+{
   meta.maintainers = [ hm.maintainers.eclairevoyant ];
 
   options.programs.swappy = {
@@ -58,7 +64,6 @@ in {
   config = mkIf cfg.enable {
     home.packages = [ cfg.package ];
 
-    xdg.configFile =
-      mkIf (cfg.settings != { }) { "swappy/config".source = iniFile; };
+    xdg.configFile = mkIf (cfg.settings != { }) { "swappy/config".source = iniFile; };
   };
 }

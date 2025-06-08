@@ -141,9 +141,9 @@ in
         Type = "dbus";
         BusName = "org.freedesktop.Notifications";
         ExecStart = "${lib.getExe cfg.package}";
-        ExecReload = [ "${cfg.package}/bin/swaync-client --reload-config" ]
-          ++ lib.optional (cfg.style != null)
-          "${cfg.package}/bin/swaync-client --reload-css";
+        ExecReload = [
+          "${cfg.package}/bin/swaync-client --reload-config"
+        ] ++ lib.optional (cfg.style != null) "${cfg.package}/bin/swaync-client --reload-css";
         Restart = "on-failure";
       };
 

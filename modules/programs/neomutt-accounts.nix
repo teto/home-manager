@@ -74,7 +74,6 @@ in
       '';
     };
 
-
     # set query_command="notmuch-addrlookup --mutt '%s'"
     queryCommand = mkOption {
       type = types.nullOr types.str;

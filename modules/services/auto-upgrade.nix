@@ -1,10 +1,17 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
-let cfg = config.services.autoUpgrade;
+let
+  cfg = config.services.autoUpgrade;
 
-in {
+in
+{
 
   options = {
 
@@ -63,13 +70,15 @@ in {
     services.autoUpgrade.flags =
       # "--no-build-output"
       [ ]
-      # ++ (if cfg.channel == null
-      #     then [ "--upgrade" ]
-      #     else [ "-I" "nixpkgs=${cfg.channel}/nixexprs.tar.xz" ]);
+    # ++ (if cfg.channel == null
+    #     then [ "--upgrade" ]
+    #     else [ "-I" "nixpkgs=${cfg.channel}/nixexprs.tar.xz" ]);
     ;
 
     systemd.user.services.home-manager-update = {
-      Unit = { Description = "Home-manager update"; };
+      Unit = {
+        Description = "Home-manager update";
+      };
 
       Service = {
         Type = "oneshot";
@@ -77,20 +86,27 @@ in {
         Restart = "on-abort";
         RestartSec = 12;
 
-        ExecStart = let home-manager = "${pkgs.home-manager}/bin/home-manager";
-        in ''
-          ${home-manager} switch ${toString cfg.flags}
-        '';
+        ExecStart =
+          let
+            home-manager = "${pkgs.home-manager}/bin/home-manager";
+          in
+          ''
+            ${home-manager} switch ${toString cfg.flags}
+          '';
       };
     };
 
     systemd.user.timers.autoUpgrade = {
-      Unit = { Description = "Home-manager periodic update"; };
+      Unit = {
+        Description = "Home-manager periodic update";
+      };
       Timer = {
         Unit = "home-manager-update.service";
         OnCalendar = cfg.frequency;
       };
-      Install = { WantedBy = [ "timers.target" ]; };
+      Install = {
+        WantedBy = [ "timers.target" ];
+      };
     };
   };
 }

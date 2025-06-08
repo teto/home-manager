@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -13,7 +18,7 @@ with lib;
       # ];
     };
 
-    # test that an empty config generates an 
+    # test that an empty config generates an
     nmt.script = ''
       vimrc="$TESTED/home-files/.config/nvim/init.vim"
       assertFileExists home-files/.config/nvim/init.vim
@@ -25,4 +30,3 @@ with lib;
     '';
   };
 }
-

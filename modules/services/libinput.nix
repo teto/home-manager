@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -11,7 +16,8 @@ let
   #   ] ++ optional (cfg.verbose) "--verbose"
   #     ++ optional (cfg.configFile != null) "--config ${cfg.configFile}";
 
-in {
+in
+{
   meta.maintainers = [ maintainers.teto ];
 
   options.services.touchegg = {
@@ -100,4 +106,3 @@ in {
     #   // (optionalAttrs (cfg.preExec  != null) { ExecStartPre  = cfg.preExec;  });
   };
 }
-

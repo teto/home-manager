@@ -1,5 +1,10 @@
 { settingsFormat }:
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 with lib;
 let
   # settingsFormat = pkgs.formats.toml { };
@@ -188,7 +193,8 @@ let
     };
   };
 
-in {
+in
+{
   options.mujmap = with lib; {
     enable = mkEnableOption "mujmap JMAP synchronization for notmuch";
 

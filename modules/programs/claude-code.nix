@@ -1,9 +1,16 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
-let cfg = config.programs.claude-code;
-in {
+let
+  cfg = config.programs.claude-code;
+in
+{
   meta.maintainers = with lib.maintainers; [ malo ];
 
   options.programs.claude-code = {
@@ -70,11 +77,10 @@ in {
     programs.ripgrep.enable = mkIf cfg.enableOptionalDependencies true;
 
     # Add activation script to disable auto-updates if the user wants that
-    home.activation.disableClaudeAutoUpdates = lib.mkIf cfg.disableAutoUpdate
-      (lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-        $DRY_RUN_CMD ${
-          getExe cfg.package
-        } config set -g autoUpdaterStatus disabled || true
-      '');
+    home.activation.disableClaudeAutoUpdates = lib.mkIf cfg.disableAutoUpdate (
+      lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+        $DRY_RUN_CMD ${getExe cfg.package} config set -g autoUpdaterStatus disabled || true
+      ''
+    );
   };
 }

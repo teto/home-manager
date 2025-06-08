@@ -1,4 +1,9 @@
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 
@@ -6,13 +11,14 @@ let
 
   cfg = config.services.mujmap;
 
-  mujmapAccounts =
-    filter (a: a.mujmap.enable) (attrValues config.accounts.email.accounts);
+  mujmapAccounts = filter (a: a.mujmap.enable) (attrValues config.accounts.email.accounts);
 
-  mujmapOptions = optional (cfg.verbose) "--verbose"
+  mujmapOptions =
+    optional (cfg.verbose) "--verbose"
     ++ optional (cfg.configFile != null) "-C ${cfg.configFile}";
   # ++ [ (concatMapStringsSep " -a" (a: a.name) mujmapAccounts) ];
-in {
+in
+{
   meta.maintainers = [ maintainers.pjones ];
 
   options.services.mujmap = {
@@ -57,44 +63,50 @@ in {
 
   config = mkIf cfg.enable {
     assertions = [
-      (lib.hm.assertions.assertPlatform "services.mujmap" pkgs
-        lib.platforms.linux)
+      (lib.hm.assertions.assertPlatform "services.mujmap" pkgs lib.platforms.linux)
     ];
 
-    systemd.user.services = mapAttrs' (name: account:
+    systemd.user.services = mapAttrs' (
+      name: account:
       nameValuePair "mujmap-${name}" {
-        Unit = { Description = "mujmap mailbox synchronization"; };
-
-        Service = let
-
-          # ${pkgs.dbus}/bin/dbus-send --system \
-          #   / net.nuetzlich.SystemNotifications.Notify \
-          #   "string:Problem detected with disk: $SMARTD_DEVICESTRING" \
-          #   "string:Warning message from smartd is: $SMARTD_MESSAGE"
-          # ''}
-        in {
-          Type = "oneshot";
-          # TODO adjust path
-          # Environment = lib.makeBinPath [
-          #   cfg.package
-          # ];
-          ExecStart =
-            "${cfg.package}/bin/mujmap -C ${config.accounts.email.maildirBasePath}/fastmail sync ${
-              concatStringsSep " " mujmapOptions
-            }";
+        Unit = {
+          Description = "mujmap mailbox synchronization";
         };
 
-      }) config.accounts.email.accounts;
+        Service =
+          let
+
+            # ${pkgs.dbus}/bin/dbus-send --system \
+            #   / net.nuetzlich.SystemNotifications.Notify \
+            #   "string:Problem detected with disk: $SMARTD_DEVICESTRING" \
+            #   "string:Warning message from smartd is: $SMARTD_MESSAGE"
+            # ''}
+          in
+          {
+            Type = "oneshot";
+            # TODO adjust path
+            # Environment = lib.makeBinPath [
+            #   cfg.package
+            # ];
+            ExecStart = "${cfg.package}/bin/mujmap -C ${config.accounts.email.maildirBasePath}/fastmail sync ${concatStringsSep " " mujmapOptions}";
+          };
+
+      }
+    ) config.accounts.email.accounts;
 
     systemd.user.timers.mujmap = {
-      Unit = { Description = "mujmap mailbox synchronization"; };
+      Unit = {
+        Description = "mujmap mailbox synchronization";
+      };
 
       Timer = {
         OnCalendar = cfg.frequency;
         Unit = "mujmap.service";
       };
 
-      Install = { WantedBy = [ "timers.target" ]; };
+      Install = {
+        WantedBy = [ "timers.target" ];
+      };
     };
   };
 }

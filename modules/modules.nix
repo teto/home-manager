@@ -251,7 +251,6 @@ let
       ./programs/pylint.nix
       ./programs/pywal.nix
       ./programs/qcal.nix
-      ./programs/pywal.nix
       ./programs/qutebrowser.nix
       ./programs/ranger.nix
       ./programs/rbenv.nix
@@ -285,9 +284,9 @@ let
       ./programs/starship.nix
       ./programs/streamlink.nix
       ./programs/superfile.nix
+      ./programs/swappy.nix
       ./programs/sway-easyfocus.nix
       ./programs/swayimg.nix
-      ./programs/swappy.nix
       ./programs/swaylock.nix
       ./programs/swayr.nix
       ./programs/taskwarrior.nix
