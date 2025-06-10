@@ -1,15 +1,25 @@
-{ lib, pkgs, config, ... }:
+{
+  lib,
+  pkgs,
+  config,
+  ...
+}:
 let
-  inherit (lib) mkIf mkEnableOption mkOption mkPackageOption;
-  cfg = config.services.wl-cilp-persist;
-in {
+  inherit (lib)
+    mkIf
+    mkEnableOption
+    mkOption
+    mkPackageOption
+    ;
+  cfg = config.services.wl-clip-persist;
+in
+{
   meta.maintainers = [ ]; # TODO: add maintainer
 
   options.services.wl-clip-persist = {
     enable = mkEnableOption "wl-clip-persist";
-    package = mkPackageOption pkgs "wl-clip-persist"; # TODO: make it global
-    systemd = mkEnableOption "systemd service for wl-clip-persist"
-      // mkOption { default = true; };
+    package = mkPackageOption pkgs "wl-clip-persist" { }; # TODO: make it global
+    systemd = mkEnableOption "systemd service for wl-clip-persist" // mkOption { default = true; };
   };
 
   config = mkIf cfg.enable {
@@ -22,8 +32,7 @@ in {
         };
 
         Service = {
-          ExecStart =
-            "${pkgs.wl-clip-persist}/bin/wl-clip-persist --clipboard both";
+          ExecStart = "${pkgs.wl-clip-persist}/bin/wl-clip-persist --clipboard both";
           Restart = "always";
         };
 
@@ -32,3 +41,4 @@ in {
     };
   };
 }
+
