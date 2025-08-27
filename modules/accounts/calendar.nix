@@ -181,8 +181,8 @@ in
       type = types.attrsOf (
         types.submodule [
           calendarOpts
-          (import ../programs/pimsync-accounts.nix)
           (import ../programs/vdirsyncer/accounts.nix)
+          # todo check if (import ../programs/pimsync-accounts.nix) has interesting features
           (import ../programs/pimsync/accounts.nix)
           (import ../programs/khal/accounts.nix)
           (import ../programs/khal/calendar-accounts.nix)
