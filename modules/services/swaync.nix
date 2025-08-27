@@ -68,6 +68,7 @@ in
 
     schema = lib.mkOption {
       default = "${cfg.package}/etc/xdg/swaync/configSchema.json";
+      defaultText = "Schema";
       type = lib.types.path;
       description = ''
         Schema to validate the configuration.
