@@ -443,6 +443,7 @@ in {
         source =  "${pkgs.neovimUtils.packDir packpathDirs}/pack/hm";
     };
 
+    # NVIM_APPNAME
     xdg.configFile =
       let hasLuaConfig = hasAttr "lua" config.programs.neovim.generatedConfigs;
       in mkMerge (
