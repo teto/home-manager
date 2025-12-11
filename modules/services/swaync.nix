@@ -8,7 +8,6 @@
 let
 
   cfg = config.services.swaync;
-
   jsonFormat = pkgs.formats.json { };
 
 in
@@ -22,6 +21,19 @@ in
     enable = lib.mkEnableOption "Swaync notification daemon";
 
     package = lib.mkPackageOption pkgs "swaynotificationcenter" { };
+
+    systemd = {
+      enable = lib.mkEnableOption "Systemd integration";
+
+      target = lib.mkOption {
+        type = lib.types.str;
+        default = "graphical-session.target";
+        example = "sway-session.target";
+        description = ''
+          Systemd target to bind to.
+        '';
+      };
+    };
 
     style = lib.mkOption {
       type = lib.types.nullOr (lib.types.either lib.types.path lib.types.lines);
@@ -50,6 +62,16 @@ in
         for the documentation.
 
         If the value is set to a path literal, then the path will be used as the CSS file.
+
+      '';
+    };
+
+    schema = lib.mkOption {
+      default = "${cfg.package}/etc/xdg/swaync/configSchema.json";
+      defaultText = "Schema";
+      type = lib.types.path;
+      description = ''
+        Schema to validate the configuration.
       '';
     };
 
@@ -120,6 +142,9 @@ in
         Type = "dbus";
         BusName = "org.freedesktop.Notifications";
         ExecStart = "${lib.getExe cfg.package}";
+        ExecReload = [ "${cfg.package}/bin/swaync-client --reload-config" ]
+          ++ lib.optional (cfg.style != null)
+          "${cfg.package}/bin/swaync-client --reload-css";
         Restart = "on-failure";
       };
 

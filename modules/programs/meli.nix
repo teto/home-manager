@@ -153,6 +153,12 @@ in
                 };
                 description = "Folder display name";
               };
+
+              settings = mkOption {
+                type = tomlFormat.type;
+                default = { };
+                description = "Account specific meli configuration";
+              };
             };
           }
         )

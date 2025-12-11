@@ -297,7 +297,7 @@ in
       configSource = jsonFormat.generate "waybar-config.json" finalConfiguration;
 
     in
-    mkIf cfg.enable (mkMerge [
+    lib.mkIf cfg.enable (mkMerge [
       {
         assertions = [
           (lib.hm.assertions.assertPlatform "programs.waybar" pkgs lib.platforms.linux)

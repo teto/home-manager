@@ -74,6 +74,17 @@ in
       '';
     };
 
+
+    # set query_command="notmuch-addrlookup --mutt '%s'"
+    queryCommand = mkOption {
+      type = types.nullOr types.str;
+      # ${pkgs.notmuch-addrlookup}/bin/
+      default = "notmuch-addrlookup --mutt '%s'";
+      example = "notmuch-addrlookup --mutt '%s'";
+      description = ''
+        Command to send a mail. If not set, mutt will be in charge of sending mails.
+      '';
+    };
     extraConfig = mkOption {
       type = types.lines;
       default = "";
