@@ -39,5 +39,32 @@
       inherit config;
       baseName = "Shell";
     };
+
+    aliases = lib.mkOption {
+      type = with lib.types; attrsOf str;
+      default = { };
+      example = lib.literalExpression ''
+        {
+          g = "git";
+          "..." = "cd ../..";
+        }
+      '';
+      description = ''
+        An attribute set that maps aliases (the top level attribute names
+        in this option) to command strings or directly to build outputs.
+
+        This option should only be used to manage simple aliases that are
+        compatible across all shells. If you need to use a shell specific
+        feature then make sure to use a shell specific option, for example
+        [](#opt-programs.bash.shellAliases) for Bash.
+      '';
+    };
+  };
+
+  config = {
+    programs.bash.shellAliases = config.home.shell.aliases;
+    programs.zsh.shellAliases = config.home.shell.aliases;
+    programs.fish.shellAliases = config.home.shell.aliases;
+    programs.nushell.shellAliases = config.home.shell.aliases;
   };
 }

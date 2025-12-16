@@ -180,6 +180,7 @@ in
 
       file yourself.
     '')
+    (lib.mkRenamedOptionModule [ "home" "shellAliases" ] [ "home" "shell" "aliases" ])
   ];
 
   options = {
@@ -239,26 +240,6 @@ in
       description = ''
         Keyboard configuration. Set to `null` to
         disable Home Manager keyboard management.
-      '';
-    };
-
-    home.shellAliases = mkOption {
-      type = with types; attrsOf str;
-      default = { };
-      example = literalExpression ''
-        {
-          g = "git";
-          "..." = "cd ../..";
-        }
-      '';
-      description = ''
-        An attribute set that maps aliases (the top level attribute names
-        in this option) to command strings or directly to build outputs.
-
-        This option should only be used to manage simple aliases that are
-        compatible across all shells. If you need to use a shell specific
-        feature then make sure to use a shell specific option, for example
-        [](#opt-programs.bash.shellAliases) for Bash.
       '';
     };
 
@@ -622,11 +603,6 @@ in
         "${config.xdg.stateHome}/nix/profile"
       else
         cfg.homeDirectory + "/.nix-profile";
-
-    programs.bash.shellAliases = cfg.shellAliases;
-    programs.zsh.shellAliases = cfg.shellAliases;
-    programs.fish.shellAliases = cfg.shellAliases;
-    programs.nushell.shellAliases = cfg.shellAliases;
 
     home.sessionVariables =
       let
