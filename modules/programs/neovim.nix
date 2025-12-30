@@ -29,6 +29,7 @@ let
     fileType
     ;
 
+  inherit (pkgs) neovimUtils;
   jsonFormat = pkgs.formats.json { };
 in
 {
@@ -432,9 +433,21 @@ in
         (concatMapStringsSep ";" luaPackages.getLuaPath resolvedExtraLuaPackages)
       ];
 
+      vimPackageInfo = neovimUtils.makeVimPackageInfo (map suppressNotVimlConfig pluginsNormalized);
+
+      packpathDirs.hm = vimPackageInfo.vimPackage;
+      finalPackdir = neovimUtils.packDir packpathDirs;
+
+      packpathWrapperArgs = lib.optionals (packpathDirs.hm.start != [ ] || packpathDirs.hm.opt != [ ]) [
+        "--add-flags"
+        ''--cmd "set packpath^=${finalPackdir}"''
+        "--add-flags"
+        ''--cmd "set rtp^=${finalPackdir}"''
+      ];
+
       wrappedNeovim' = pkgs.wrapNeovimUnstable cfg.package {
         withNodeJs = cfg.withNodeJs || cfg.coc.enable;
-        plugins = map suppressNotVimlConfig pluginsNormalized;
+        plugins = [ ];
 
         inherit (cfg)
           extraPython3Packages
@@ -449,7 +462,11 @@ in
           ;
         neovimRcContent = cfg.extraConfig;
         wrapperArgs =
-          cfg.extraWrapperArgs ++ extraMakeWrapperArgs ++ extraMakeWrapperLuaCArgs ++ extraMakeWrapperLuaArgs;
+          cfg.extraWrapperArgs
+          ++ extraMakeWrapperArgs
+          ++ extraMakeWrapperLuaCArgs
+          ++ extraMakeWrapperLuaArgs
+          ++ packpathWrapperArgs;
         wrapRc = false;
       };
     in
