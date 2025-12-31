@@ -19,6 +19,6 @@ writeShellApplication {
     '';
   };
   text = ''
-    exec python3 ${flake}/tests/tests.py "$@"
+    exec python3 ${flake}/tests/tests.py  "$@"
   '';
 }

@@ -108,6 +108,7 @@ class TestRunner:
                 "nix", "build", "-L", "--keep-failed", "--reference-lock-file", "flake.lock",
                 f"./tests#{test}", *nix_args
             ]
+            print(cmd)
             try:
                 # For this command, we want output to go directly to the terminal
                 result = subprocess.run(cmd, check=True, cwd=self.repo_root, capture_output=True, text=True)
@@ -199,13 +200,15 @@ def main() -> None:
         'filters', nargs='*', help='Filter tests by name (partial matches work).'
     )
     parser.add_argument(
-        'nix_args', nargs=argparse.REMAINDER,
+        '--nix_args', nargs=1,
         help="Arguments to pass to 'nix build', must be after '--'."
     )
     args = parser.parse_args()
+    # args, nix_args = parser.parse_known_args()
 
     # Strip the '--' if it exists
     nix_args = [arg for arg in args.nix_args if arg != '--']
+    print ("nix_args: ", nix_args)
 
     runner = TestRunner()
     try:

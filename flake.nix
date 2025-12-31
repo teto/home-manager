@@ -71,7 +71,16 @@
               inherit (releaseInfo) release isReleaseBranch;
             };
             hmPkg = pkgs.callPackage ./home-manager { path = "${self}"; };
+
+            # Test group definitions
+            buildTests =
+              let
+                tests = import ./tests { inherit pkgs; };
+                renameTestPkg = n: nixpkgs.lib.nameValuePair "test-${n}";
+              in
+              nixpkgs.lib.mapAttrs' renameTestPkg tests.build;
           in
+          buildTests //
           {
             default = hmPkg;
             home-manager = hmPkg;
