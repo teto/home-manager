@@ -466,11 +466,12 @@ in
           ps: (cfg.extraPython3Packages ps) ++ (lib.concatMap (f: f ps) vimPackageInfo.pluginPython3Packages);
         neovimRcContent = cfg.extraConfig;
         wrapperArgs =
-          cfg.extraWrapperArgs
+            cfg.extraWrapperArgs
           ++ extraMakeWrapperArgs
           ++ extraMakeWrapperLuaCArgs
           ++ extraMakeWrapperLuaArgs
-          ++ packpathWrapperArgs;
+          # ++ packpathWrapperArgs
+          ;
         wrapRc = false;
       };
     in
@@ -530,6 +531,17 @@ in
             lib.mkAfter (foldedLuaBlock "user-associated plugin config" cfg.generatedConfigs.lua)
           ))
         ];
+
+    # link the packpath in expected folder so that even unwrapped neovim can pick
+    # home-manager's plugins
+    xdg.dataFile."nvim/site/pack/hm" = let
+
+      # TODO make it optional ?
+      # lib.optionals (packpathDirs.hm.start != [ ] || packpathDirs.hm.opt != [ ]) [
+      packpathDirs.hm = vimPackageInfo.vimPackage;
+    in {
+      source = "${pkgs.neovimUtils.packDir packpathDirs}/pack/hm";
+    };
 
       xdg.configFile = lib.mkMerge (
         # writes runtime
