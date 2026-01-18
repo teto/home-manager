@@ -344,6 +344,10 @@ in
       }
 
       (mkIf cfg.systemd.enable {
+
+        systemd.user.packages = [
+          cfg.package
+        ];
         systemd.user.services.waybar = {
           Unit = {
             Description = "Highly customizable Wayland bar for Sway and Wlroots based compositors.";
