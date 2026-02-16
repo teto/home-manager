@@ -333,7 +333,7 @@ in
     home.packages = [
       (cfg.package.withAddons (
         [
-          helper.homeManagerAnkiAddon
+          # helper.homeManagerAnkiAddon
           helper.syncConfigAnkiAddon
         ]
         ++ cfg.addons

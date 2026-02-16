@@ -42,7 +42,7 @@ let
     "%${length}%${rendered}";
 
   renderOptions = generators.toKeyValue {
-    mkKeyValue = generators.mkKeyValueDefault { mkValueString = renderOptionValue; } "=";
+    mkKeyValue = generators.mkKeyValueDefault { mkValueString = renderOption; } "=";
     listsAsDuplicateKeys = true;
   };
 

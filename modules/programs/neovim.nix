@@ -466,7 +466,11 @@ in
       };
 
       home = {
-        packages = [ cfg.finalPackage ];
+        packages = [
+          # HACK until I get all the rest fixed
+          cfg.package
+          # cfg.finalPackage
+        ];
 
         sessionVariables = mkIf cfg.defaultEditor {
           EDITOR = "nvim";
