@@ -13,7 +13,7 @@ let
   packageVersion = if cfg.package != null then lib.getVersion cfg.package else null;
   themeIsToml = lib.versionAtLeast packageVersion "0.15.0";
   versionPost0_17 = lib.versionAtLeast packageVersion "0.17.0";
-  settingsPath = if versionPost0_17 then "vicinae/settings.json" else "vicinae/vicinae.json";
+  settingsPath = if versionPost0_17 then "vicinae/generated.json" else "vicinae/vicinae.json";
 in
 {
   meta.maintainers = [ lib.maintainers.leiserfg ];
