@@ -121,6 +121,14 @@ in
 
       };
 
+      generatedConfig = mkOption {
+        type = types.nullOr types.str;
+        readOnly = true;
+        description = ''
+          The generated config.
+        '';
+      };
+
       dbFile = mkOption {
         type = types.nullOr types.str;
         default = "${cfg.dataDir}/tag_cache";
@@ -136,7 +144,7 @@ in
 
   config =
     let
-      mpdConf = pkgs.writeText "mpd.conf" (
+      generatedConfig =
         ''
           music_directory     "${cfg.musicDirectory}"
           playlist_directory  "${cfg.playlistDirectory}"
@@ -161,7 +169,8 @@ in
         + lib.optionalString (cfg.extraConfig != "") ''
           ${cfg.extraConfig}
         ''
-      );
+      ;
+      mpdConf = pkgs.writeText "mpd.conf" generatedConfig;
     in
     mkIf cfg.enable {
       home = {
@@ -176,8 +185,6 @@ in
         );
       };
 
-      xdg.configFile."mpd/mpd.conf".source = mpdConf;
-
       services.mpd = lib.mkMerge [
         (mkIf (lib.versionAtLeast config.home.stateVersion "22.11" && config.xdg.userDirs.enable) {
           musicDirectory = lib.mkOptionDefault config.xdg.userDirs.music;
@@ -186,6 +193,8 @@ in
         (mkIf (lib.versionOlder config.home.stateVersion "22.11") {
           musicDirectory = lib.mkOptionDefault "${config.home.homeDirectory}/music";
         })
+
+        ({generatedConfig = generatedConfig;})
       ];
 
       systemd.user = {
