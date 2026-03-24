@@ -176,6 +176,8 @@ in
         );
       };
 
+      xdg.configFile."mpd/mpd.conf".source = mpdConf;
+
       services.mpd = lib.mkMerge [
         (mkIf (lib.versionAtLeast config.home.stateVersion "22.11" && config.xdg.userDirs.enable) {
           musicDirectory = lib.mkOptionDefault config.xdg.userDirs.music;
