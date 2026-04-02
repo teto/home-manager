@@ -34,13 +34,14 @@ let
       send_mail = mkSmtp account;
       mailboxes = account.meli.mailboxAliases;
     }
-    // lib.optionalAttrs (account.flavor == "fastmail.com") {
-      server_username = account.userName;
-      server_password_command = lib.concatMapStringsSep " " lib.escapeShellArg account.passwordCommand;
-      format = "jmap";
-      server_url = "https://api.fastmail.com/jmap/session";
-      use_token = true;
-    }
+    # just to test notmuch output
+    # // lib.optionalAttrs (account.flavor == "fastmail.com") {
+    #   server_username = account.userName;
+    #   server_password_command = lib.concatMapStringsSep " " lib.escapeShellArg account.passwordCommand;
+    #   format = "jmap";
+    #   server_url = "https://api.fastmail.com/jmap/session";
+    #   use_token = true;
+    # }
     // account.meli.settings
   );
 
