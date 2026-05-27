@@ -307,7 +307,7 @@ let
     }
   );
 
-  abbrsStr = lib.concatStringsSep "\n" (
+  abbrsStr =
     lib.mapAttrsToList (
       attrName: def:
       let
@@ -335,11 +335,9 @@ let
       "abbr --add ${modifiers} -- ${name}"
       + lib.optionalString (expansion != null) " ${lib.escapeShellArg expansion}"
     ) cfg.shellAbbrs
-  );
+  ;
 
-  aliasesStr = lib.concatStringsSep "\n" (
-    lib.mapAttrsToList (k: v: "alias ${k} ${lib.escapeShellArg v}") cfg.shellAliases
-  );
+  aliasesStr = lib.mapAttrsToList (k: v: "alias ${k} ${lib.escapeShellArg v}") cfg.shellAliases;
 
   filteredBinds = lib.filterAttrs (_: { enable, ... }: enable) cfg.binds;
 
@@ -424,7 +422,7 @@ let
       handlerFunctions = lib.filterAttrs isHandler cfg.functions;
       sourceFunction = name: _def: "source ${config.xdg.configHome}/fish/functions/${name}.fish";
     in
-    builtins.concatStringsSep "\n" (lib.mapAttrsToList sourceFunction handlerFunctions);
+    lib.mapAttrsToList sourceFunction handlerFunctions;
 
 in
 {
@@ -748,7 +746,8 @@ in
       })
 
       {
-        xdg.configFile."fish/config.fish".source = fishIndent "config.fish" ''
+        xdg.configFile."fish/config.fish".source = fishIndent "config.fish" (
+            lib.concatStringsSep "\n" ([ ''
           # ~/.config/fish/config.fish: DO NOT EDIT -- this file has been generated
           # automatically by home-manager.
 
@@ -759,10 +758,14 @@ in
           source ${cfg.sessionVariablesPackage}/${sessionVarsFile}
 
           # Source handler functions
-          ${sourceHandlersStr}
+          ''
+        ]
+        ++ sourceHandlersStr
+        ++ [
 
-          ${cfg.shellInit}
+          cfg.shellInit
 
+          ''
           status is-login; and begin
 
             # Login shell initialisation
@@ -771,20 +774,25 @@ in
           end
 
           status is-interactive; and begin
+          ''
 
             # Abbreviations
-            ${abbrsStr}
-
+          ] ++
+            abbrsStr
             # Aliases
-            ${aliasesStr}
+        ++ aliasesStr
+        ++ [
 
+
+            ''
             # Interactive shell initialisation
             ${cfg.interactiveShellInit}
 
           end
+        ''
 
-          ${cfg.shellInitLast}
-        '';
+          cfg.shellInitLast
+      ]));
       }
       {
         xdg.configFile = lib.mapAttrs' (name: def: {
