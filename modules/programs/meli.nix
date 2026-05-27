@@ -51,9 +51,10 @@ let
     auth = {
       type = "auto";
       username = account.userName;
+      # changed in https://git.meli-email.org/meli/meli/commit/3eb7a9fa1b95fb832308352565a5b799f12b9d00
       password = {
-        type = "command_eval";
-        value = lib.strings.concatStringsSep " " account.passwordCommand;
+        # type = "command_eval";
+        command = lib.strings.concatStringsSep " " account.passwordCommand;
       };
     };
     security = {
