@@ -29,6 +29,18 @@ in
   options.programs.noctalia = {
     enable = lib.mkEnableOption "noctalia, a lightweight Wayland shell and bar";
 
+    enableCalendars = lib.mkEnableOption "Home Manager calendar accounts in noctalia" // {
+      description = ''
+        Add filesystem calendars from {option}`accounts.calendar.accounts`
+        to Noctalia's settings as local vdir accounts. Single-file calendars
+        are not included.
+
+        Requires {option}`programs.noctalia.settings` to be an attribute set.
+        Generated account fields can be overridden through
+        {option}`programs.noctalia.settings.calendar.account`.
+      '';
+    };
+
     systemd.enable = lib.mkEnableOption "a systemd user service for noctalia";
 
     package = lib.mkPackageOption pkgs "noctalia" { nullable = true; };
@@ -95,6 +107,22 @@ in
   };
 
   config = lib.mkIf cfg.enable {
+    programs.noctalia.settings = lib.mkIf cfg.enableCalendars (
+      let
+        calendars = lib.filterAttrs (
+          _: account: account.local.type == "filesystem"
+        ) config.accounts.calendar.accounts;
+      in
+      lib.optionalAttrs (calendars != { }) {
+        calendar.account = lib.mapAttrs (_: account: {
+          name = lib.mkDefault account.name;
+          type = lib.mkDefault "vdir";
+          path = lib.mkDefault account.local.path;
+          color = lib.mkDefault "primary";
+        }) calendars;
+      }
+    );
+
     assertions = [
       (lib.hm.assertions.assertPlatform "programs.noctalia" pkgs lib.platforms.linux)
 
