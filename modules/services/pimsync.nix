@@ -41,6 +41,8 @@ in
     systemd.user.services.pimsync = {
       Unit = {
         Description = "pimsync calendar and contacts synchronization";
+        Wants = [ "network-online.target" ];
+        After = [ "network-online.target" ];
       };
       Install.WantedBy = [ "default.target" ];
       Service = {
